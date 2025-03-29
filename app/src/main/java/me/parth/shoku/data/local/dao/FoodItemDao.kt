@@ -23,7 +23,7 @@ interface FoodItemDao {
     @Query("SELECT * FROM food_items ORDER BY frequency DESC, name ASC")
     fun getAllFoodItemsSortedByFrequency(): Flow<List<FoodItemEntity>>
 
-    @Query("SELECT * FROM food_items WHERE name LIKE :query || '%' ORDER BY frequency DESC, name ASC LIMIT 10")
+    @Query("SELECT * FROM food_items WHERE name LIKE '%' || :query || '%' ORDER BY frequency DESC, name ASC LIMIT 10")
     fun getFoodItemSuggestions(query: String): Flow<List<FoodItemEntity>>
 
     // We might need a way to increment frequency later

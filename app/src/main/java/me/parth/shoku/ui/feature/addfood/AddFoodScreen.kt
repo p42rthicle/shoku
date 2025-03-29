@@ -1,8 +1,12 @@
 package me.parth.shoku.ui.feature.addfood
 
 import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -82,16 +86,44 @@ fun AddFoodForm(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
 
-        // Food Name
-        OutlinedTextField(
-            value = uiState.foodName,
-            onValueChange = { onIntent(AddFoodContract.Intent.UpdateFoodName(it)) },
-            label = { Text("Food Name") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            // Optionally add error indication based on validation attempt
-            // isError = uiState.foodName.isBlank() && uiState.attemptedSave
-        )
+        // --- Food Name with Suggestions --- Start
+        Column {
+            OutlinedTextField(
+                value = uiState.foodName,
+                onValueChange = { onIntent(AddFoodContract.Intent.UpdateFoodName(it)) },
+                label = { Text("Food Name") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                // Optionally add error indication based on validation attempt
+                // isError = uiState.foodName.isBlank() && uiState.attemptedSave
+            )
+
+            // Display suggestions if available
+            val suggestions = uiState.suggestions
+            if (suggestions.isNotEmpty()) {
+                // Using a simple Column as suggestion lists are often short
+                // Use LazyColumn for potentially very long lists
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 150.dp) // Limit height to avoid taking too much space
+                        .border(BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)), RoundedCornerShape(4.dp))
+                        .verticalScroll(rememberScrollState()) // Scroll if suggestions exceed max height
+                ) {
+                    suggestions.forEach { foodItem ->
+                        Text(
+                            text = "${foodItem.name} (${foodItem.calories} kcal/${foodItem.defaultUnit ?: "unit"})".take(60), // Limit text length
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { onIntent(AddFoodContract.Intent.SelectSuggestion(foodItem)) }
+                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                        )
+                        Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                    }
+                }
+            }
+        }
+        // --- Food Name with Suggestions --- End
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             // Quantity
