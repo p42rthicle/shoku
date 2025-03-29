@@ -16,17 +16,17 @@ This document outlines the tasks required to implement the basic food item entry
 -   [x] **Dependency Injection:** Set up DI modules (Hilt/Koin) to provide `AppDatabase`, `FoodItemDao`, and `LoggedEntryDao`.
 -   [x] **Repository:** Define `FoodRepository` interface with methods like `addLoggedEntry(entry: LoggedEntry)` and `getOrCreateFoodItem(name: String, calories: Double, protein: Double): FoodItem`. ✅
 -   [x] **Repository:** Implement `FoodRepositoryImpl` injecting DAOs and implementing the interface methods (handle mapping between domain models and entities). ✅
--   [x] **Dependency Injection:** Add `FoodRepository` to DI modules.
--   [ ] **ViewModel (MVI):** Define `AddFoodContract` containing `UiState`, `Intent`, and `Effect` classes for the Add Food screen.
--   [ ] **ViewModel (MVI):** Create `AddEntryViewModel` implementing `ViewModel()`.
--   [ ] **ViewModel (MVI):** Inject `FoodRepository` (or a `LogFoodItemUseCase`) into `AddEntryViewModel`.
--   [ ] **ViewModel (MVI):** Implement MVI logic: handle `Intent.SaveEntry`, call repository/use case, update `UiState` (e.g., show loading, success/error message via `Effect`).
--   [ ] **UI (`AddFoodScreen`):** Create the basic Composable structure for `AddFoodScreen`.
--   [ ] **UI (`AddFoodScreen`):** Add `TextField` Composables for Name, Quantity, Calories, Protein.
--   [ ] **UI (`AddFoodScreen`):** Add a dropdown/selector Composable for Unit (e.g., using `ExposedDropdownMenuBox`). Populate with initial units (g, ml, pc, etc.).
--   [ ] **UI (`AddFoodScreen`):** Add an optional `TextField` for notes/recipe.
--   [ ] **UI (`AddFoodScreen`):** Create a `MealSelector` Composable (e.g., Row of Buttons or Dropdown) and integrate it.
--   [ ] **UI (`AddFoodScreen`):** Add a `Button` Composable for saving the entry.
--   [ ] **UI Connection:** Connect `AddFoodScreen` input fields' state to the ViewModel's state management (or directly trigger intents).
--   [ ] **UI Connection:** Trigger `Intent.SaveEntry` from the Save Button's `onClick` lambda, passing the current input data.
--   [ ] **Navigation (Basic):** Set up basic navigation to be able to reach `AddFoodScreen` (even if temporary from MainActivity initially).
+-   [x] **Dependency Injection:** Add `FoodRepository` to DI modules. ✅
+-   [x] **ViewModel (MVI):** Define `AddFoodContract` containing `UiState`, `Intent`, and `Effect` classes for the Add Food screen. ✅
+-   [x] **ViewModel (MVI):** Create `AddEntryViewModel` implementing `ViewModel()`. ✅
+-   [x] **ViewModel (MVI):** Inject `FoodRepository` (or a `LogFoodItemUseCase`) into `AddEntryViewModel`. ✅
+-   [x] **ViewModel (MVI):** Implement MVI logic: handle `Intent.SaveEntry`, call repository/use case, update `UiState` (e.g., show loading, success/error message via `Effect`). ✅
+-   [x] **UI (`AddFoodScreen`):** Create the basic Composable structure for `AddFoodScreen`. ✅
+-   [x] **UI (`AddFoodScreen`):** Add `TextField` Composables for Name, Quantity, Calories, Protein. ✅
+-   [x] **UI (`AddFoodScreen`):** Add a dropdown/selector Composable for Unit (e.g., using `ExposedDropdownMenuBox`). Populate with initial units (g, ml, pc, etc.). ✅
+-   [x] **UI (`AddFoodScreen`):** Add an optional `TextField` for notes/recipe. ✅
+-   [x] **UI (`AddFoodScreen`):** Create a `MealSelector` Composable (e.g., Row of Buttons or Dropdown) and integrate it. ✅
+-   [x] **UI (`AddFoodScreen`):** Add a `Button` Composable for saving the entry. ✅
+-   [x] **UI Connection:** Connect `AddFoodScreen` input fields' state to the ViewModel's state management (or directly trigger intents). ✅
+-   [x] **UI Connection:** Trigger `Intent.SaveEntry` from the Save Button's `onClick` lambda, passing the current input data. ✅
+-   [x] **Navigation (Basic):** Set up basic navigation to be able to reach `AddFoodScreen` (even if temporary from MainActivity initially). ✅

@@ -1,0 +1,60 @@
+package me.parth.shoku.ui.feature.addfood
+
+import me.parth.shoku.domain.model.Meal
+
+/**
+ * Defines the contract between the UI and the ViewModel for the Add Food screen,
+ * following the MVI pattern.
+ */
+interface AddFoodContract {
+
+    /**
+     * Represents the state of the Add Food screen UI.
+     *
+     * @param foodName Current value of the food name input.
+     * @param quantity Current value of the quantity input.
+     * @param unit Current selected unit.
+     * @param calories Current value of the calories input.
+     * @param protein Current value of the protein input.
+     * @param selectedMeal Current selected meal.
+     * @param notes Current value of the notes input.
+     * @param availableUnits List of units for the dropdown.
+     * @param availableMeals List of meals for selection.
+     * @param isLoading Indicates if a save operation is in progress.
+     */
+    data class UiState(
+        val foodName: String = "",
+        val quantity: String = "", // Use String for input flexibility
+        val unit: String = "g", // Default unit
+        val calories: String = "", // Use String for input flexibility
+        val protein: String = "", // Use String for input flexibility
+        val selectedMeal: Meal = Meal.BREAKFAST, // Default meal
+        val notes: String = "",
+        val availableUnits: List<String> = listOf("g", "ml", "pc", "cup", "slice", "katori"),
+        val availableMeals: List<Meal> = Meal.entries.toList(),
+        val isLoading: Boolean = false
+    )
+
+    /**
+     * Represents user actions or events initiated from the UI.
+     */
+    sealed interface Intent {
+        data class UpdateFoodName(val name: String) : Intent
+        data class UpdateQuantity(val quantity: String) : Intent
+        data class UpdateUnit(val unit: String) : Intent
+        data class UpdateCalories(val calories: String) : Intent
+        data class UpdateProtein(val protein: String) : Intent
+        data class UpdateSelectedMeal(val meal: Meal) : Intent
+        data class UpdateNotes(val notes: String) : Intent
+        object SaveEntry : Intent
+    }
+
+    /**
+     * Represents side effects that the ViewModel triggers, usually for one-time events
+     * like navigation or showing a toast/snackbar.
+     */
+    sealed interface Effect {
+        object EntrySavedSuccessfully : Effect
+        data class ShowError(val message: String) : Effect
+    }
+} 

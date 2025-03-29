@@ -4,14 +4,17 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.navigation.compose.*
 import dagger.hilt.android.AndroidEntryPoint
+import me.parth.shoku.ui.feature.addfood.AddFoodScreen
+import me.parth.shoku.ui.navigation.Screen
 import me.parth.shoku.ui.theme.ShokuTheme
 
 @AndroidEntryPoint
@@ -20,30 +23,58 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            ShokuTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+            ShokuAppRoot()
+        }
+    }
+}
+
+@Composable
+fun ShokuAppRoot() {
+    ShokuTheme {
+        val navController = rememberNavController()
+        NavHost(
+            navController = navController,
+            startDestination = Screen.Home.route
+        ) {
+            composable(Screen.Home.route) {
+                PlaceholderHomeScreen(
+                    modifier = Modifier.fillMaxSize(),
+                    onNavigateToAddFood = { navController.navigate(Screen.AddFood.route) }
+                )
+            }
+            composable(Screen.AddFood.route) {
+                AddFoodScreen(
+                    onNavigateBack = { navController.popBackStack() }
+                )
             }
         }
     }
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
+fun PlaceholderHomeScreen(modifier: Modifier = Modifier, onNavigateToAddFood: () -> Unit) {
+    Scaffold(modifier = modifier) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text("Home Screen Placeholder")
+            Spacer(modifier = Modifier.height(20.dp))
+            Button(onClick = onNavigateToAddFood) {
+                Text("Go to Add Food")
+            }
+        }
+    }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
+fun DefaultPreview() {
     ShokuTheme {
-        Greeting("Android")
+        PlaceholderHomeScreen(onNavigateToAddFood = {})
     }
 }
