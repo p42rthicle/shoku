@@ -4,7 +4,7 @@ This document outlines the tasks required to implement the basic food item entry
 
 ## To-Do List
 
--   [ ] **Project Setup:** Ensure necessary dependencies (Compose, Room, Coroutines, ViewModel, DI framework) are added to `build.gradle` files.
+-   [x] **Project Setup:** Ensure necessary dependencies (Compose, Room, Coroutines, ViewModel, Navigation Compose, Hilt) are added to `build.gradle.kts` files. ✅
 -   [ ] **Data Model:** Define the `FoodItem` data class (representing the concept of a food) in the domain/common layer.
 -   [ ] **Data Model:** Define the `LoggedEntry` data class (representing an instance of eating a food) in the domain/common layer.
 -   [ ] **Data Model:** Define the `Meal` data class/enum (e.g., Breakfast, Lunch, Dinner) in the domain/common layer.
