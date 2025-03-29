@@ -5,18 +5,18 @@ This document outlines the tasks required to implement the basic food item entry
 ## To-Do List
 
 -   [x] **Project Setup:** Ensure necessary dependencies (Compose, Room, Coroutines, ViewModel, Navigation Compose, Hilt) are added to `build.gradle.kts` files. ✅
--   [ ] **Data Model:** Define the `FoodItem` data class (representing the concept of a food) in the domain/common layer.
--   [ ] **Data Model:** Define the `LoggedEntry` data class (representing an instance of eating a food) in the domain/common layer.
--   [ ] **Data Model:** Define the `Meal` data class/enum (e.g., Breakfast, Lunch, Dinner) in the domain/common layer.
--   [ ] **Database:** Define `FoodItemEntity` Room Entity.
--   [ ] **Database:** Define `LoggedEntryEntity` Room Entity (including fields for timestamp, meal type, quantity, unit, calories, protein, and potentially a foreign key to `FoodItemEntity` or store denormalized food details).
--   [ ] **Database:** Define `FoodItemDao` interface with methods for inserting and possibly querying `FoodItemEntity`.
--   [ ] **Database:** Define `LoggedEntryDao` interface with method for inserting `LoggedEntryEntity`.
--   [ ] **Database:** Create `AppDatabase` class extending `RoomDatabase`, listing entities and DAOs.
--   [ ] **Dependency Injection:** Set up DI modules (Hilt/Koin) to provide `AppDatabase`, `FoodItemDao`, and `LoggedEntryDao`.
--   [ ] **Repository:** Define `FoodRepository` interface with methods like `addLoggedEntry(entry: LoggedEntry)` and `getOrCreateFoodItem(name: String, calories: Double, protein: Double): FoodItem`.
--   [ ] **Repository:** Implement `FoodRepositoryImpl` injecting DAOs and implementing the interface methods (handle mapping between domain models and entities).
--   [ ] **Dependency Injection:** Add `FoodRepository` to DI modules.
+-   [x] **Data Model:** Define the `FoodItem` data class (representing the concept of a food) in the domain/common layer. ✅
+-   [x] **Data Model:** Define the `LoggedEntry` data class (representing an instance of eating a food) in the domain/common layer. ✅
+-   [x] **Data Model:** Define the `Meal` data class/enum (e.g., Breakfast, Lunch, Dinner) in the domain/common layer. ✅
+-   [x] **Database:** Define `FoodItemEntity` Room Entity. ✅
+-   [x] **Database:** Define `LoggedEntryEntity` Room Entity (including fields for timestamp, meal type, quantity, unit, calories, protein, and potentially a foreign key to `FoodItemEntity` or store denormalized food details). ✅
+-   [x] **Database:** Define `FoodItemDao` interface with methods for inserting and possibly querying `FoodItemEntity`. ✅
+-   [x] **Database:** Define `LoggedEntryDao` interface with method for inserting `LoggedEntryEntity`. ✅
+-   [x] **Database:** Create `AppDatabase` class extending `RoomDatabase`, listing entities and DAOs. ✅
+-   [x] **Dependency Injection:** Set up DI modules (Hilt/Koin) to provide `AppDatabase`, `FoodItemDao`, and `LoggedEntryDao`.
+-   [x] **Repository:** Define `FoodRepository` interface with methods like `addLoggedEntry(entry: LoggedEntry)` and `getOrCreateFoodItem(name: String, calories: Double, protein: Double): FoodItem`. ✅
+-   [x] **Repository:** Implement `FoodRepositoryImpl` injecting DAOs and implementing the interface methods (handle mapping between domain models and entities). ✅
+-   [x] **Dependency Injection:** Add `FoodRepository` to DI modules.
 -   [ ] **ViewModel (MVI):** Define `AddFoodContract` containing `UiState`, `Intent`, and `Effect` classes for the Add Food screen.
 -   [ ] **ViewModel (MVI):** Create `AddEntryViewModel` implementing `ViewModel()`.
 -   [ ] **ViewModel (MVI):** Inject `FoodRepository` (or a `LogFoodItemUseCase`) into `AddEntryViewModel`.
@@ -29,4 +29,4 @@ This document outlines the tasks required to implement the basic food item entry
 -   [ ] **UI (`AddFoodScreen`):** Add a `Button` Composable for saving the entry.
 -   [ ] **UI Connection:** Connect `AddFoodScreen` input fields' state to the ViewModel's state management (or directly trigger intents).
 -   [ ] **UI Connection:** Trigger `Intent.SaveEntry` from the Save Button's `onClick` lambda, passing the current input data.
--   [ ] **Navigation (Basic):** Set up basic navigation to be able to reach `AddFoodScreen` (even if temporary from MainActivity initially). 
+-   [ ] **Navigation (Basic):** Set up basic navigation to be able to reach `AddFoodScreen` (even if temporary from MainActivity initially).
