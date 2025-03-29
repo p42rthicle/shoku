@@ -1,6 +1,7 @@
 package me.parth.shoku.ui.feature.addfood
 
 import me.parth.shoku.domain.model.Meal
+import me.parth.shoku.domain.model.FoodItem
 
 /**
  * Defines the contract between the UI and the ViewModel for the Add Food screen,
@@ -21,6 +22,7 @@ interface AddFoodContract {
      * @param availableUnits List of units for the dropdown.
      * @param availableMeals List of meals for selection.
      * @param isLoading Indicates if a save operation is in progress.
+     * @param suggestions List of food items for suggestions.
      */
     data class UiState(
         val foodName: String = "",
@@ -32,7 +34,8 @@ interface AddFoodContract {
         val notes: String = "",
         val availableUnits: List<String> = listOf("g", "ml", "pc", "cup", "slice", "katori"),
         val availableMeals: List<Meal> = Meal.entries.toList(),
-        val isLoading: Boolean = false
+        val isLoading: Boolean = false,
+        val suggestions: List<FoodItem> = emptyList()
     )
 
     /**
@@ -47,6 +50,7 @@ interface AddFoodContract {
         data class UpdateSelectedMeal(val meal: Meal) : Intent
         data class UpdateNotes(val notes: String) : Intent
         object SaveEntry : Intent
+        data class SelectSuggestion(val foodItem: FoodItem) : Intent
     }
 
     /**
