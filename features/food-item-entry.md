@@ -52,3 +52,8 @@ This document outlines the tasks required to implement the basic food item entry
     -   [ ] Verify clicking 'Save' triggers the correct ViewModel intent.
     -   [ ] Verify error messages/states are shown correctly on validation failure (if UI handles this).
     -   [ ] Verify successful save navigates away or clears the form (depending on desired behavior).
+
+## Requested Enhancements / Fixes
+
+-   [x] **2. Add Entry for Specific Date:** Modify navigation/ViewModel logic so that when navigating to `AddFoodScreen` from a specific date view (like `HomeScreen`), the new entry is saved for *that* selected date, not always the current date. ✅
+-   [x] **3. Recalculate on Quantity Change:** After selecting a suggestion (which auto-fills fields), if the user changes the `quantity`, the `calories` and `protein` fields should automatically recalculate based on the base values of the selected food item and the new quantity. ✅

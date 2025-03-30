@@ -50,6 +50,7 @@ interface HomeContract {
         data class UpdateCalorieTargetInput(val value: String) : Intent
         data class UpdateProteinTargetInput(val value: String) : Intent
         data object SaveTargets : Intent
+        data object RefreshTargets : Intent // New intent to refresh targets
     }
 
     /**

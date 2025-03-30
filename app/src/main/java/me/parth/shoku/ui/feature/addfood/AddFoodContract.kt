@@ -23,6 +23,9 @@ interface AddFoodContract {
      * @param availableMeals List of meals for selection.
      * @param isLoading Indicates if a save operation is in progress.
      * @param suggestions List of food items for suggestions.
+     * @param baseCaloriesPerUnit Calories of the suggested item per its default unit
+     * @param baseProteinPerUnit Protein of the suggested item per its default unit
+     * @param suggestionSelected Flag to indicate if current values came from a suggestion
      */
     data class UiState(
         val foodName: String = "",
@@ -35,7 +38,10 @@ interface AddFoodContract {
         val availableUnits: List<String> = listOf("g", "ml", "pc", "cup", "slice", "katori"),
         val availableMeals: List<Meal> = Meal.entries.toList(),
         val isLoading: Boolean = false,
-        val suggestions: List<FoodItem> = emptyList()
+        val suggestions: List<FoodItem> = emptyList(),
+        val baseCaloriesPerUnit: Double? = null, // Calories of the suggested item per its default unit
+        val baseProteinPerUnit: Double? = null, // Protein of the suggested item per its default unit
+        val suggestionSelected: Boolean = false // Flag to indicate if current values came from a suggestion
     )
 
     /**

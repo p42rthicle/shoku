@@ -76,6 +76,9 @@ class HomeViewModel @Inject constructor(
             is HomeContract.Intent.SaveTargets -> {
                 saveTargets()
             }
+            is HomeContract.Intent.RefreshTargets -> {
+                refreshTargets()
+            }
         }
     }
 
@@ -161,6 +164,27 @@ class HomeViewModel @Inject constructor(
             } catch (e: Exception) {
                 _uiState.update { it.copy(isSavingTarget = false) }
                 sendEffect(HomeContract.Effect.ShowError("Failed to save targets: ${e.localizedMessage}"))
+            }
+        }
+    }
+
+    private fun refreshTargets() {
+        viewModelScope.launch {
+            // Only fetch targets and update those specific fields
+            try {
+                val calorieTarget = foodRepository.getCalorieTarget()
+                val proteinTarget = foodRepository.getProteinTarget()
+                _uiState.update {
+                    it.copy(
+                        calorieTarget = calorieTarget,
+                        proteinTarget = proteinTarget
+                        // Potentially re-initialize inputs if needed, but maybe not desirable here
+                        // calorieTargetInput = calorieTarget.roundToInt().toString(),
+                        // proteinTargetInput = proteinTarget.roundToInt().toString()
+                    )
+                }
+            } catch (e: Exception) {
+                 sendEffect(HomeContract.Effect.ShowError("Failed to refresh targets: ${e.localizedMessage}"))
             }
         }
     }

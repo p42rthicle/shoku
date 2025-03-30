@@ -1,5 +1,6 @@
 package me.parth.shoku.ui.feature.addfood
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -11,13 +12,22 @@ import kotlinx.coroutines.launch
 import me.parth.shoku.domain.model.FoodItem
 import me.parth.shoku.domain.model.LoggedEntry
 import me.parth.shoku.domain.repository.FoodRepository
+import me.parth.shoku.ui.navigation.Screen
+import java.time.LocalDate
+import java.time.format.DateTimeParseException
 import javax.inject.Inject
+import kotlin.math.roundToInt
 
 @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class AddEntryViewModel @Inject constructor(
-    private val foodRepository: FoodRepository
+    private val foodRepository: FoodRepository,
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel(), MviViewModel<AddFoodContract.UiState, AddFoodContract.Intent, AddFoodContract.Effect> {
+
+    private val entryDate: LocalDate = savedStateHandle.get<String>(Screen.AddFood.dateArg)?.let {
+        try { LocalDate.parse(it) } catch (e: DateTimeParseException) { null }
+    } ?: LocalDate.now()
 
     private val _uiState = MutableStateFlow(AddFoodContract.UiState())
     override val uiState = _uiState.asStateFlow()
@@ -55,14 +65,32 @@ class AddEntryViewModel @Inject constructor(
     override fun onIntent(intent: AddFoodContract.Intent) {
         when (intent) {
             is AddFoodContract.Intent.UpdateFoodName -> {
-                // Just update the name, suggestions will update via the flow observation
-                _uiState.update { it.copy(foodName = intent.name) }
+                // Reset suggestion flag if user types manually
+                _uiState.update { it.copy(foodName = intent.name, suggestionSelected = false) }
             }
             is AddFoodContract.Intent.SelectSuggestion -> handleSuggestionSelection(intent.foodItem)
-            is AddFoodContract.Intent.UpdateQuantity -> _uiState.update { it.copy(quantity = intent.quantity) }
-            is AddFoodContract.Intent.UpdateUnit -> _uiState.update { it.copy(unit = intent.unit) }
-            is AddFoodContract.Intent.UpdateCalories -> _uiState.update { it.copy(calories = intent.calories) }
-            is AddFoodContract.Intent.UpdateProtein -> _uiState.update { it.copy(protein = intent.protein) }
+            is AddFoodContract.Intent.UpdateQuantity -> {
+                // Recalculate if a suggestion was selected and base values are available
+                val currentState = uiState.value
+                val newQuantity = intent.quantity.toDoubleOrNull()
+                if (currentState.suggestionSelected && newQuantity != null && newQuantity > 0 && currentState.baseCaloriesPerUnit != null && currentState.baseProteinPerUnit != null) {
+                    val newCalories = (currentState.baseCaloriesPerUnit * newQuantity).roundToInt()
+                    val newProtein = (currentState.baseProteinPerUnit * newQuantity).roundToInt()
+                    _uiState.update {
+                        it.copy(
+                            quantity = intent.quantity,
+                            calories = newCalories.toString(),
+                            protein = newProtein.toString()
+                        )
+                    }
+                } else {
+                    // Otherwise, just update quantity and clear flag
+                    _uiState.update { it.copy(quantity = intent.quantity, suggestionSelected = false) }
+                }
+            }
+            is AddFoodContract.Intent.UpdateUnit -> _uiState.update { it.copy(unit = intent.unit, suggestionSelected = false) } // Clear flag
+            is AddFoodContract.Intent.UpdateCalories -> _uiState.update { it.copy(calories = intent.calories, suggestionSelected = false) } // Clear flag
+            is AddFoodContract.Intent.UpdateProtein -> _uiState.update { it.copy(protein = intent.protein, suggestionSelected = false) } // Clear flag
             is AddFoodContract.Intent.UpdateSelectedMeal -> _uiState.update { it.copy(selectedMeal = intent.meal) }
             is AddFoodContract.Intent.UpdateNotes -> _uiState.update { it.copy(notes = intent.notes) }
             AddFoodContract.Intent.SaveEntry -> saveEntry()
@@ -72,14 +100,16 @@ class AddEntryViewModel @Inject constructor(
     private fun handleSuggestionSelection(foodItem: FoodItem) {
         _uiState.update {
             it.copy(
-                foodName = foodItem.name, // Fill name
-                // Assuming 1 unit initially when selecting suggestion
-                // User can then adjust quantity if needed
+                foodName = foodItem.name,
                 quantity = "1",
-                unit = foodItem.defaultUnit ?: it.unit, // Use suggested unit or keep current
-                calories = foodItem.calories.toString(), // Fill calories (per standard unit)
-                protein = foodItem.protein.toString(), // Fill protein (per standard unit)
-                suggestions = emptyList() // Clear suggestions after selection
+                unit = foodItem.defaultUnit ?: it.unit,
+                calories = foodItem.calories.roundToInt().toString(), // Use base value initially
+                protein = foodItem.protein.roundToInt().toString(), // Use base value initially
+                suggestions = emptyList(),
+                // Store base values and set flag
+                baseCaloriesPerUnit = foodItem.calories,
+                baseProteinPerUnit = foodItem.protein,
+                suggestionSelected = true
             )
         }
     }
@@ -104,6 +134,7 @@ class AddEntryViewModel @Inject constructor(
             protein = protein,
             meal = currentState.selectedMeal,
             notes = currentState.notes.takeIf { it.isNotBlank() },
+            date = entryDate
         )
 
         viewModelScope.launch {

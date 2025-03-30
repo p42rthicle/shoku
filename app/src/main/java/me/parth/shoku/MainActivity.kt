@@ -56,14 +56,23 @@ fun ShokuAppRoot() {
             composable(
                 route = Screen.Home.route,
                 arguments = Screen.Home.arguments
-            ) {
+            ) { backStackEntry ->
+                val viewModel: HomeViewModel = hiltViewModel(backStackEntry)
+                val homeState = viewModel.uiState.collectAsState().value
+
                 HomeScreen(
-                    onNavigateToAddEntry = { navController.navigate(Screen.AddFood.route) },
+                    viewModel = viewModel,
+                    onNavigateToAddEntry = {
+                        navController.navigate(Screen.AddFood.createRoute(homeState.selectedDate.toString()))
+                    },
                     onNavigateToSettings = { navController.navigate(Screen.DailyTargets.route) },
                     onNavigateToHistory = { navController.navigate(Screen.History.route) }
                 )
             }
-            composable(Screen.AddFood.route) {
+            composable(
+                route = Screen.AddFood.route,
+                arguments = Screen.AddFood.arguments
+            ) {
                 AddFoodScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )

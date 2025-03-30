@@ -32,9 +32,10 @@ This document outlines the tasks required to implement the daily summary display
     -   [x] Implement `DateSelector` Composable. ✅
     -   [x] Implement `DailySummaryDisplay` Composable. ✅
     -   [x] Implement `TargetProgressIndicator` Composable. ✅
+        -   [ ] **(Bug Fix):** Ensure progress indicator updates immediately after targets are saved in settings.
     -   [x] Implement `DailyLogList` Composable (grouped by meal). ✅
-        -   [ ] *(Future Enhancement)* Add click action to edit a logged item.
-        -   [ ] *(Future Enhancement)* Add swipe action or button to delete a logged item.
+        -   [ ] *(Future Enhancement)* Add click action to edit a logged item. *(See #4)*
+        -   [ ] *(Future Enhancement)* Add swipe action or button to delete a logged item. *(See #4)*
     -   [x] Add button/icon to trigger `Intent.OpenTargetSettings`. ✅
     -   [x] Add FAB to navigate to `AddFoodScreen`. ✅
 -   [x] **UI (`DailyTargetScreen` or Dialog):**
@@ -52,3 +53,8 @@ This document outlines the tasks required to implement the daily summary display
     -   [ ] Unit Test: `FoodRepository` (target saving/loading - SharedPreferences testing can be tricky).
     -   [ ] Instrumentation Test: `HomeScreen` (date selection, summary display, target display, list display, navigation).
     -   [ ] Instrumentation Test: `DailyTargetScreen`/Dialog. 
+
+## Requested Enhancements / Fixes
+
+-   [x] **1. Target Progress Update:** Fix issue where `TargetProgressIndicator` on `HomeScreen` doesn't reflect newly saved targets immediately after returning from `DailyTargetScreen`.
+-   [ ] **4. Edit/Delete Logged Items:** Implement functionality to edit or delete entries directly from the `HomeScreen`'s `DailyLogList` (e.g., via click, long press, or swipe action).
