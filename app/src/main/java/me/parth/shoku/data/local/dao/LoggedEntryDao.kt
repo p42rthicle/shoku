@@ -29,6 +29,10 @@ interface LoggedEntryDao {
     """)
     fun getDailySummaries(): Flow<List<DailySummaryPojo>>
 
+    // Query to get all entries, ordered most recent first
+    @Query("SELECT * FROM logged_entries ORDER BY date DESC, id DESC")
+    fun getAllLoggedEntries(): Flow<List<LoggedEntryEntity>>
+
     // Add queries for history, daily summaries etc. later as needed
 
 } 

@@ -24,5 +24,6 @@ sealed class Screen(val route: String) {
     object AddFood : Screen("add_food")
     object DailyTargets : Screen("daily_targets") // Add route for target settings
     object History : Screen("history") // Add route for history screen
+    object AllEntries : Screen("all_entries") // Add route for all entries screen
     // Add other screens like History, Settings etc. later
 } 

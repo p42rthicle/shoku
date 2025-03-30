@@ -1,6 +1,5 @@
-package me.parth.shoku.ui.feature.history
+package me.parth.shoku.ui.feature.allentries
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -17,17 +16,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import me.parth.shoku.domain.model.DailySummary
-import java.time.LocalDate
+import me.parth.shoku.domain.model.LoggedEntry
+import me.parth.shoku.domain.model.Meal
 import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HistoryScreen(
-    viewModel: HistoryViewModel = hiltViewModel(),
-    onNavigateBack: () -> Unit,
-    onNavigateToDayDetail: (LocalDate) -> Unit,
-    onNavigateToAllEntries: () -> Unit
+fun AllEntriesScreen(
+    viewModel: AllEntriesViewModel = hiltViewModel(),
+    onNavigateBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -35,8 +32,7 @@ fun HistoryScreen(
     LaunchedEffect(Unit) {
         viewModel.effect.collect {
             when(it) {
-                is HistoryContract.Effect.NavigateToDayDetail -> onNavigateToDayDetail(it.date)
-                is HistoryContract.Effect.ShowError -> {
+                is AllEntriesContract.Effect.ShowError -> {
                     snackbarHostState.showSnackbar(it.message)
                 }
             }
@@ -47,21 +43,16 @@ fun HistoryScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text("History") },
+                title = { Text("All Entries") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                },
-                actions = {
-                    TextButton(onClick = onNavigateToAllEntries) {
-                        Text("View All")
                     }
                 }
             )
         }
     ) { paddingValues ->
-        Box(modifier = Modifier.padding(paddingValues).fillMaxSize()) {
+         Box(modifier = Modifier.padding(paddingValues).fillMaxSize()) {
             when {
                 uiState.isLoading -> {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
@@ -75,9 +66,9 @@ fun HistoryScreen(
                         modifier = Modifier.align(Alignment.Center).padding(16.dp)
                     )
                 }
-                uiState.dailySummaries.isEmpty() -> {
+                 uiState.allEntries.isEmpty() -> {
                      Text(
-                        text = "No history yet. Start logging some food!",
+                        text = "No entries logged yet.",
                         textAlign = TextAlign.Center,
                         modifier = Modifier.align(Alignment.Center).padding(16.dp)
                     )
@@ -85,14 +76,12 @@ fun HistoryScreen(
                 else -> {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                        contentPadding = PaddingValues(vertical = 8.dp) // Padding top/bottom
                     ) {
-                        items(uiState.dailySummaries, key = { it.date }) { summary ->
-                            DailySummaryRow(summary = summary, onClick = {
-                                viewModel.onIntent(HistoryContract.Intent.SelectDay(summary.date))
-                            })
-                            Divider()
+                        // Optionally add date headers if needed, but for now just a flat list
+                        items(uiState.allEntries, key = { it.id }) { entry ->
+                           FullLogItemRow(entry = entry)
+                           Divider(thickness = 0.5.dp, modifier = Modifier.padding(horizontal = 16.dp))
                         }
                     }
                 }
@@ -102,25 +91,36 @@ fun HistoryScreen(
 }
 
 @Composable
-fun DailySummaryRow(
-    summary: DailySummary,
-    onClick: () -> Unit
-) {
+fun FullLogItemRow(entry: LoggedEntry) {
+    // Display including date and meal
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = summary.date.format(DateTimeFormatter.ofPattern("EEE, MMM d, yyyy")),
-            style = MaterialTheme.typography.bodyLarge
-        )
-        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)){
-            Text("${summary.totalCalories.toInt()} kcal", style = MaterialTheme.typography.bodyMedium)
-            Text("${summary.totalProtein.toInt()} g", style = MaterialTheme.typography.bodyMedium)
+        Column(modifier = Modifier.weight(1f)) {
+            Text(text = entry.foodName, style = MaterialTheme.typography.bodyLarge)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)){
+                 Text(
+                    text = entry.date.format(DateTimeFormatter.ofPattern("MMM d, yyyy")), // Date first
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                 Text(
+                    text = entry.meal.name.lowercase().replaceFirstChar { it.titlecase() }, // Meal
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+        Column(horizontalAlignment = Alignment.End) {
+            Text(text = "${entry.calories.toInt()} kcal", style = MaterialTheme.typography.bodyMedium)
+            Text(
+                text = "${entry.protein.toInt()} g pro",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 } 

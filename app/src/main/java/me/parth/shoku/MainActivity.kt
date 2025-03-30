@@ -25,6 +25,7 @@ import androidx.navigation.compose.*
 import dagger.hilt.android.AndroidEntryPoint
 import me.parth.shoku.ui.feature.addfood.AddFoodContract
 import me.parth.shoku.ui.feature.addfood.AddFoodScreen
+import me.parth.shoku.ui.feature.allentries.AllEntriesScreen
 import me.parth.shoku.ui.feature.history.HistoryScreen
 import me.parth.shoku.ui.feature.home.HomeScreen
 import me.parth.shoku.ui.feature.home.HomeViewModel
@@ -79,7 +80,13 @@ fun ShokuAppRoot() {
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToDayDetail = { date ->
                         navController.navigate(Screen.Home.createRoute(date.toString()))
-                    }
+                    },
+                    onNavigateToAllEntries = { navController.navigate(Screen.AllEntries.route) }
+                )
+            }
+            composable(Screen.AllEntries.route) {
+                AllEntriesScreen(
+                    onNavigateBack = { navController.popBackStack() }
                 )
             }
         }

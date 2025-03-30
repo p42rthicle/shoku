@@ -37,6 +37,7 @@ interface FoodRepository {
 
     // --- History --- 
     fun getDailySummaries(): Flow<List<DailySummary>>
+    fun getAllLoggedEntries(): Flow<List<LoggedEntry>>
 
     // Add other methods as needed (e.g., get daily summary, get history)
 } 

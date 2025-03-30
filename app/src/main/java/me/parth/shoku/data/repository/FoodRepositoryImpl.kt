@@ -147,6 +147,14 @@ class FoodRepositoryImpl @Inject constructor(
             }
             .flowOn(Dispatchers.IO)
     }
+
+    override fun getAllLoggedEntries(): Flow<List<LoggedEntry>> {
+        return loggedEntryDao.getAllLoggedEntries()
+            .map { entityList ->
+                entityList.map { it.toDomainModel() } // Reuse existing mapper
+            }
+            .flowOn(Dispatchers.IO)
+    }
 }
 
 // --- Mappers --- (Could be in separate files: e.g., data/local/mapper/FoodMappers.kt)
