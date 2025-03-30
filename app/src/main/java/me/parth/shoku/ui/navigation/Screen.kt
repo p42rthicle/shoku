@@ -21,15 +21,21 @@ sealed class Screen(val route: String) {
             }
         )
     }
-    // Add optional date argument to AddFood route
-    object AddFood : Screen("add_food?date={date}") {
-        fun createRoute(date: String?) = if (date != null) "add_food?date=$date" else "add_food"
+    // Add optional date and entryId arguments to AddFood route
+    object AddFood : Screen("add_food?date={date}&entryId={entryId}") {
+        fun createRouteWithDate(date: String?) = if (date != null) "add_food?date=$date" else "add_food"
+        fun createRouteWithId(entryId: Long) = "add_food?entryId=$entryId"
         val dateArg = "date"
+        val entryIdArg = "entryId"
         val arguments = listOf(
             navArgument(dateArg) {
                 type = NavType.StringType
                 nullable = true
                 defaultValue = null
+            },
+            navArgument(entryIdArg) {
+                type = NavType.LongType
+                defaultValue = -1L // Use -1 to indicate new entry
             }
         )
     }

@@ -63,10 +63,13 @@ fun ShokuAppRoot() {
                 HomeScreen(
                     viewModel = viewModel,
                     onNavigateToAddEntry = {
-                        navController.navigate(Screen.AddFood.createRoute(homeState.selectedDate.toString()))
+                        navController.navigate(Screen.AddFood.createRouteWithDate(homeState.selectedDate.toString()))
                     },
                     onNavigateToSettings = { navController.navigate(Screen.DailyTargets.route) },
-                    onNavigateToHistory = { navController.navigate(Screen.History.route) }
+                    onNavigateToHistory = { navController.navigate(Screen.History.route) },
+                    onNavigateToEditEntry = { entryId ->
+                        navController.navigate(Screen.AddFood.createRouteWithId(entryId))
+                    }
                 )
             }
             composable(

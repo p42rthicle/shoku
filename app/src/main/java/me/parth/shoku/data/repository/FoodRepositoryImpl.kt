@@ -155,6 +155,31 @@ class FoodRepositoryImpl @Inject constructor(
             }
             .flowOn(Dispatchers.IO)
     }
+
+    override suspend fun deleteLoggedEntry(entry: LoggedEntry) {
+        // Need to map domain model back to entity for DAO operation
+        // The ID must be correct for deletion.
+        val entityToDelete = entry.toEntity(entry.foodItemId) // Assuming toEntity handles ID correctly
+        withContext(Dispatchers.IO) {
+            loggedEntryDao.deleteLoggedEntry(entityToDelete)
+            // Optionally, decrement frequency of related FoodItem? (More complex)
+        }
+    }
+
+    override suspend fun updateLoggedEntry(entry: LoggedEntry) {
+        // Map domain model to entity, ensuring ID is preserved
+        val entityToUpdate = entry.toEntity(entry.foodItemId)
+        withContext(Dispatchers.IO) {
+            loggedEntryDao.updateLoggedEntry(entityToUpdate)
+            // Note: Frequency update logic might be needed here too if editing affects food item usage.
+        }
+    }
+
+    override suspend fun getEntryById(id: Long): LoggedEntry? {
+        return withContext(Dispatchers.IO) {
+            loggedEntryDao.getEntryById(id)?.toDomainModel()
+        }
+    }
 }
 
 // --- Mappers --- (Could be in separate files: e.g., data/local/mapper/FoodMappers.kt)

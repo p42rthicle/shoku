@@ -51,6 +51,8 @@ interface HomeContract {
         data class UpdateProteinTargetInput(val value: String) : Intent
         data object SaveTargets : Intent
         data object RefreshTargets : Intent // New intent to refresh targets
+        // Intent for deleting an entry
+        data class DeleteEntry(val entry: LoggedEntry) : Intent
     }
 
     /**

@@ -7,6 +7,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import me.parth.shoku.domain.model.LoggedEntry
 import me.parth.shoku.domain.repository.FoodRepository
 import me.parth.shoku.ui.feature.addfood.MviViewModel
 import me.parth.shoku.ui.navigation.Screen
@@ -79,12 +80,23 @@ class HomeViewModel @Inject constructor(
             is HomeContract.Intent.RefreshTargets -> {
                 refreshTargets()
             }
+            is HomeContract.Intent.DeleteEntry -> {
+                deleteEntry(intent.entry)
+            }
         }
     }
 
     private fun loadDataForDate(date: LocalDate) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) } // Show loading
+            // Only show loading indicator if data isn't already loaded for this date
+            // or if triggered by an explicit reload intent (if we add one)
+            val showLoading = uiState.value.dailyEntries.isEmpty() || uiState.value.selectedDate != date
+            if (showLoading) {
+                 _uiState.update { it.copy(isLoading = true, error = null) }
+            } else {
+                 // If not showing full loading, still clear previous error
+                 _uiState.update { it.copy(error = null) }
+            }
 
             try {
                 // Fetch targets first (or potentially combine with entry fetching)
@@ -185,6 +197,20 @@ class HomeViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                  sendEffect(HomeContract.Effect.ShowError("Failed to refresh targets: ${e.localizedMessage}"))
+            }
+        }
+    }
+
+    private fun deleteEntry(entry: LoggedEntry) {
+        viewModelScope.launch {
+            try {
+                foodRepository.deleteLoggedEntry(entry)
+                // No need to manually remove from list, as the Flow from
+                // getEntriesForDate should automatically update after deletion.
+                // Optionally send a success feedback effect:
+                // sendEffect(HomeContract.Effect.ShowMessage("Entry deleted"))
+            } catch (e: Exception) {
+                sendEffect(HomeContract.Effect.ShowError("Failed to delete entry: ${e.localizedMessage}"))
             }
         }
     }

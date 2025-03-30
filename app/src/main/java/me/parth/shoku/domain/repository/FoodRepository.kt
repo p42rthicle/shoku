@@ -19,6 +19,21 @@ interface FoodRepository {
     suspend fun addLoggedEntry(entry: LoggedEntry)
 
     /**
+     * Deletes a specific logged entry.
+     */
+    suspend fun deleteLoggedEntry(entry: LoggedEntry)
+
+    /**
+     * Updates an existing logged entry.
+     */
+    suspend fun updateLoggedEntry(entry: LoggedEntry)
+
+    /**
+      * Gets a single logged entry by its ID.
+      */
+    suspend fun getEntryById(id: Long): LoggedEntry?
+
+    /**
      * Retrieves a flow of logged entries for a specific date.
      */
     fun getEntriesForDate(date: LocalDate): Flow<List<LoggedEntry>>

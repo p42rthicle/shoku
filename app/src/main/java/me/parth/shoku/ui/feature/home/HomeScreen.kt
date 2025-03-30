@@ -1,6 +1,8 @@
 package me.parth.shoku.ui.feature.home
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -9,9 +11,15 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.DismissDirection
+import androidx.compose.material3.DismissValue
+import androidx.compose.material3.rememberSwipeToDismissBoxState
+import androidx.compose.material3.SwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -39,7 +47,8 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
     onNavigateToAddEntry: () -> Unit,
     onNavigateToSettings: () -> Unit,
-    onNavigateToHistory: () -> Unit
+    onNavigateToHistory: () -> Unit,
+    onNavigateToEditEntry: (Long) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -49,8 +58,8 @@ fun HomeScreen(
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
-                // Refresh targets when the screen resumes
-                viewModel.onIntent(HomeContract.Intent.RefreshTargets)
+                // Refresh ALL data for the selected date when screen resumes
+                viewModel.onIntent(HomeContract.Intent.LoadDataForSelectedDate)
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -101,7 +110,8 @@ fun HomeScreen(
         HomeScreenContent(
             modifier = Modifier.padding(paddingValues),
             uiState = uiState,
-            onIntent = viewModel::onIntent
+            onIntent = viewModel::onIntent,
+            onNavigateToEditEntry = onNavigateToEditEntry
         )
     }
 }
@@ -110,7 +120,8 @@ fun HomeScreen(
 fun HomeScreenContent(
     modifier: Modifier = Modifier,
     uiState: HomeContract.UiState,
-    onIntent: (HomeContract.Intent) -> Unit
+    onIntent: (HomeContract.Intent) -> Unit,
+    onNavigateToEditEntry: (Long) -> Unit
 ) {
     Column(
         modifier = modifier
@@ -142,7 +153,11 @@ fun HomeScreenContent(
                 proteinTarget = uiState.proteinTarget
             )
 
-            DailyLogList(entries = uiState.dailyEntries)
+            DailyLogList(
+                entries = uiState.dailyEntries,
+                onIntent = onIntent,
+                onNavigateToEditEntry = onNavigateToEditEntry
+            )
         }
     }
 }
@@ -238,9 +253,13 @@ fun TargetProgressIndicator(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun DailyLogList(entries: List<LoggedEntry>) {
+fun DailyLogList(
+    entries: List<LoggedEntry>,
+    onIntent: (HomeContract.Intent) -> Unit,
+    onNavigateToEditEntry: (Long) -> Unit
+) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text("Today's Log", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(bottom = 8.dp))
 
@@ -276,9 +295,50 @@ fun DailyLogList(entries: List<LoggedEntry>) {
                         }
                     }
 
-                    // List items for the current meal
+                    // List items for the current meal with swipe-to-delete
                     items(entriesForMeal, key = { it.id }) { entry ->
-                        FoodLogItem(entry = entry)
+                        val dismissState = rememberSwipeToDismissBoxState(
+                            confirmValueChange = { dismissValue ->
+                                if (dismissValue == SwipeToDismissBoxValue.EndToStart || dismissValue == SwipeToDismissBoxValue.StartToEnd) {
+                                    onIntent(HomeContract.Intent.DeleteEntry(entry))
+                                    true // Indicate dismiss action is consumed
+                                } else {
+                                    false
+                                }
+                            }
+                        )
+
+                        SwipeToDismissBox(
+                            state = dismissState,
+                            backgroundContent = { // Content shown behind the item during swipe
+                                val direction = dismissState.targetValue // Use targetValue
+                                val alignment = when(direction) {
+                                     SwipeToDismissBoxValue.EndToStart -> Alignment.CenterEnd
+                                     SwipeToDismissBoxValue.StartToEnd -> Alignment.CenterStart
+                                     SwipeToDismissBoxValue.Settled -> Alignment.Center // Or Start for consistency
+                                }
+                                // Don't draw a full background color, just the icon
+                                Box(
+                                    Modifier
+                                        .fillMaxSize()
+                                        // Optional: Add slight background tint on swipe if desired
+                                        // .background(MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.1f))
+                                        .padding(horizontal = 20.dp),
+                                    contentAlignment = alignment
+                                ) {
+                                    Icon(
+                                        Icons.Default.Delete,
+                                        contentDescription = "Delete Icon",
+                                        tint = MaterialTheme.colorScheme.error // Make icon red
+                                    )
+                                }
+                            }
+                        ) {
+                            FoodLogItem(
+                                entry = entry,
+                                onClick = { onNavigateToEditEntry(entry.id) }
+                            )
+                        }
                         Divider(thickness = 0.5.dp)
                     }
                 }
@@ -288,11 +348,12 @@ fun DailyLogList(entries: List<LoggedEntry>) {
 }
 
 @Composable
-fun FoodLogItem(entry: LoggedEntry) {
+fun FoodLogItem(entry: LoggedEntry, onClick: () -> Unit) {
     // Simple display for a single logged food item
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .clickable(onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween

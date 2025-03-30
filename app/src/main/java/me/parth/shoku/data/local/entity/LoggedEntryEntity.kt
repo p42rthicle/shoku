@@ -21,7 +21,7 @@ import java.time.LocalDate
 )
 data class LoggedEntryEntity(
     @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,
+    val id: Long = 0,
     val foodName: String,
     val quantity: Double,
     val unit: String,

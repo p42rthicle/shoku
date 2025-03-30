@@ -2,6 +2,7 @@ package me.parth.shoku.ui.feature.addfood
 
 import me.parth.shoku.domain.model.Meal
 import me.parth.shoku.domain.model.FoodItem
+import java.time.LocalDate
 
 /**
  * Defines the contract between the UI and the ViewModel for the Add Food screen,
@@ -26,6 +27,7 @@ interface AddFoodContract {
      * @param baseCaloriesPerUnit Calories of the suggested item per its default unit
      * @param baseProteinPerUnit Protein of the suggested item per its default unit
      * @param suggestionSelected Flag to indicate if current values came from a suggestion
+     * @param date Store the date being edited/added
      */
     data class UiState(
         val foodName: String = "",
@@ -41,7 +43,8 @@ interface AddFoodContract {
         val suggestions: List<FoodItem> = emptyList(),
         val baseCaloriesPerUnit: Double? = null, // Calories of the suggested item per its default unit
         val baseProteinPerUnit: Double? = null, // Protein of the suggested item per its default unit
-        val suggestionSelected: Boolean = false // Flag to indicate if current values came from a suggestion
+        val suggestionSelected: Boolean = false, // Flag to indicate if current values came from a suggestion
+        val date: LocalDate = LocalDate.now() // Store the date being edited/added
     )
 
     /**

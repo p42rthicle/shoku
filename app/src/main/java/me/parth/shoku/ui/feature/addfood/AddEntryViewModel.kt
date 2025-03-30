@@ -17,6 +17,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeParseException
 import javax.inject.Inject
 import kotlin.math.roundToInt
+import android.util.Log
 
 @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -25,18 +26,62 @@ class AddEntryViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel(), MviViewModel<AddFoodContract.UiState, AddFoodContract.Intent, AddFoodContract.Effect> {
 
-    private val entryDate: LocalDate = savedStateHandle.get<String>(Screen.AddFood.dateArg)?.let {
-        try { LocalDate.parse(it) } catch (e: DateTimeParseException) { null }
-    } ?: LocalDate.now()
+    // Read entryId argument, -1 indicates new entry
+    private val entryId: Long = savedStateHandle.get<Long>(Screen.AddFood.entryIdArg) ?: -1L
+    private val isEditMode = entryId != -1L
 
-    private val _uiState = MutableStateFlow(AddFoodContract.UiState())
+    // Determine entry date from arg or default to now (only for new entries)
+    private val entryDate: LocalDate = if (isEditMode) {
+        // In edit mode, date comes from the fetched entry (set during load)
+        LocalDate.now() // This becomes just a temporary default before load
+    } else {
+        // For new entries, get from argument or default to now
+        savedStateHandle.get<String>(Screen.AddFood.dateArg)?.let {
+            try { LocalDate.parse(it) } catch (e: DateTimeParseException) { null }
+        } ?: LocalDate.now()
+    }
+
+    private val _uiState = MutableStateFlow(AddFoodContract.UiState(date = entryDate))
     override val uiState = _uiState.asStateFlow()
 
     private val _effect = Channel<AddFoodContract.Effect>(Channel.BUFFERED)
     override val effect = _effect.receiveAsFlow()
 
     init {
-        observeFoodNameChanges()
+        if (isEditMode) {
+            loadEntryForEdit()
+        } else {
+            // Initialize for new entry (suggestion observation)
+            observeFoodNameChanges()
+        }
+    }
+
+    private fun loadEntryForEdit() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) } // Show loading while fetching
+            val entry = foodRepository.getEntryById(entryId)
+            if (entry != null) {
+                _uiState.update {
+                    it.copy(
+                        foodName = entry.foodName,
+                        quantity = entry.quantity.toString(),
+                        unit = entry.unit,
+                        calories = entry.calories.roundToInt().toString(),
+                        protein = entry.protein.roundToInt().toString(),
+                        selectedMeal = entry.meal,
+                        notes = entry.notes ?: "",
+                        date = entry.date,
+                        isLoading = false
+                    )
+                }
+                // Start observing suggestions AFTER pre-filling, if desired
+                observeFoodNameChanges()
+            } else {
+                _uiState.update { it.copy(isLoading = false) }
+                sendEffect(AddFoodContract.Effect.ShowError("Failed to load entry for editing"))
+                // Optionally navigate back or show permanent error
+            }
+        }
     }
 
     @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
@@ -70,10 +115,12 @@ class AddEntryViewModel @Inject constructor(
             }
             is AddFoodContract.Intent.SelectSuggestion -> handleSuggestionSelection(intent.foodItem)
             is AddFoodContract.Intent.UpdateQuantity -> {
-                // Recalculate if a suggestion was selected and base values are available
+                Log.d("AddEntryVM", "UpdateQuantity Intent: ${intent.quantity}")
                 val currentState = uiState.value
+                Log.d("AddEntryVM", "Current State: suggestionSelected=${currentState.suggestionSelected}, baseCal=${currentState.baseCaloriesPerUnit}, basePro=${currentState.baseProteinPerUnit}")
                 val newQuantity = intent.quantity.toDoubleOrNull()
                 if (currentState.suggestionSelected && newQuantity != null && newQuantity > 0 && currentState.baseCaloriesPerUnit != null && currentState.baseProteinPerUnit != null) {
+                    Log.d("AddEntryVM", "Recalculating totals...")
                     val newCalories = (currentState.baseCaloriesPerUnit * newQuantity).roundToInt()
                     val newProtein = (currentState.baseProteinPerUnit * newQuantity).roundToInt()
                     _uiState.update {
@@ -84,7 +131,7 @@ class AddEntryViewModel @Inject constructor(
                         )
                     }
                 } else {
-                    // Otherwise, just update quantity and clear flag
+                    Log.d("AddEntryVM", "NOT Recalculating. Updating quantity only.")
                     _uiState.update { it.copy(quantity = intent.quantity, suggestionSelected = false) }
                 }
             }
@@ -115,7 +162,7 @@ class AddEntryViewModel @Inject constructor(
     }
 
     private fun saveEntry() {
-        val currentState = _uiState.value
+        val currentState = uiState.value
         val quantity = currentState.quantity.toDoubleOrNull()
         val calories = currentState.calories.toDoubleOrNull()
         val protein = currentState.protein.toDoubleOrNull()
@@ -127,6 +174,7 @@ class AddEntryViewModel @Inject constructor(
         }
 
         val entry = LoggedEntry(
+            id = if (isEditMode) entryId else 0L,
             foodName = currentState.foodName.trim(),
             quantity = quantity,
             unit = currentState.unit,
@@ -134,20 +182,27 @@ class AddEntryViewModel @Inject constructor(
             protein = protein,
             meal = currentState.selectedMeal,
             notes = currentState.notes.takeIf { it.isNotBlank() },
-            date = entryDate
+            date = currentState.date
         )
 
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
-            try {
-                foodRepository.addLoggedEntry(entry)
-                sendEffect(AddFoodContract.Effect.EntrySavedSuccessfully)
-                 _uiState.value = AddFoodContract.UiState() // Reset state
-            } catch (e: Exception) {
-                sendEffect(AddFoodContract.Effect.ShowError("Failed to save entry: ${e.localizedMessage}"))
-            } finally {
-                _uiState.update { it.copy(isLoading = false) }
-            }
+             _uiState.update { it.copy(isLoading = true) }
+             try {
+                 if (isEditMode) {
+                     foodRepository.updateLoggedEntry(entry)
+                 } else {
+                     foodRepository.addLoggedEntry(entry)
+                 }
+                 sendEffect(AddFoodContract.Effect.EntrySavedSuccessfully)
+                 // Consider not resetting state in edit mode, just navigate back?
+                 if (!isEditMode) {
+                    _uiState.value = AddFoodContract.UiState() // Reset state only for new entries
+                 }
+             } catch (e: Exception) {
+                 sendEffect(AddFoodContract.Effect.ShowError("Failed to ${if (isEditMode) "update" else "save"} entry: ${e.localizedMessage}"))
+             } finally {
+                 _uiState.update { it.copy(isLoading = false) }
+             }
         }
     }
 
