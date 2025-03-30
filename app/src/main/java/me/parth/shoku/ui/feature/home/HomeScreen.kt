@@ -311,26 +311,27 @@ fun DailyLogList(
                         SwipeToDismissBox(
                             state = dismissState,
                             backgroundContent = { // Content shown behind the item during swipe
-                                val direction = dismissState.targetValue // Use targetValue
-                                val alignment = when(direction) {
-                                     SwipeToDismissBoxValue.EndToStart -> Alignment.CenterEnd
-                                     SwipeToDismissBoxValue.StartToEnd -> Alignment.CenterStart
-                                     SwipeToDismissBoxValue.Settled -> Alignment.Center // Or Start for consistency
-                                }
-                                // Don't draw a full background color, just the icon
-                                Box(
-                                    Modifier
-                                        .fillMaxSize()
-                                        // Optional: Add slight background tint on swipe if desired
-                                        // .background(MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.1f))
-                                        .padding(horizontal = 20.dp),
-                                    contentAlignment = alignment
-                                ) {
-                                    Icon(
-                                        Icons.Default.Delete,
-                                        contentDescription = "Delete Icon",
-                                        tint = MaterialTheme.colorScheme.error // Make icon red
-                                    )
+                                val direction = dismissState.targetValue
+                                // Only draw background when swiping (targetValue is not Settled)
+                                if (direction != SwipeToDismissBoxValue.Settled) {
+                                    val alignment = when (direction) {
+                                        SwipeToDismissBoxValue.EndToStart -> Alignment.CenterEnd
+                                        SwipeToDismissBoxValue.StartToEnd -> Alignment.CenterStart
+                                        else -> Alignment.CenterStart // Should not happen if check is correct
+                                    }
+                                    Box(
+                                        Modifier
+                                            .fillMaxSize()
+                                            .background(MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.8f))
+                                            .padding(horizontal = 20.dp),
+                                        contentAlignment = alignment
+                                    ) {
+                                        Icon(
+                                            Icons.Default.Delete,
+                                            contentDescription = "Delete Icon",
+                                            tint = MaterialTheme.colorScheme.onErrorContainer
+                                        )
+                                    }
                                 }
                             }
                         ) {

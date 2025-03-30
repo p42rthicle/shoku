@@ -110,34 +110,50 @@ class AddEntryViewModel @Inject constructor(
     override fun onIntent(intent: AddFoodContract.Intent) {
         when (intent) {
             is AddFoodContract.Intent.UpdateFoodName -> {
-                // Reset suggestion flag if user types manually
-                _uiState.update { it.copy(foodName = intent.name, suggestionSelected = false) }
+                 // Clear base values and base unit
+                 _uiState.update { it.copy(foodName = intent.name, baseCaloriesPerUnit = null, baseProteinPerUnit = null, baseUnit = null) }
             }
             is AddFoodContract.Intent.SelectSuggestion -> handleSuggestionSelection(intent.foodItem)
             is AddFoodContract.Intent.UpdateQuantity -> {
-                Log.d("AddEntryVM", "UpdateQuantity Intent: ${intent.quantity}")
+                 val currentState = uiState.value
+                 val newQuantity = intent.quantity.toDoubleOrNull()
+                 // Recalculate if base values exist AND current unit matches base unit
+                 if (newQuantity != null && newQuantity > 0 && currentState.baseCaloriesPerUnit != null && currentState.baseProteinPerUnit != null && currentState.unit == currentState.baseUnit) {
+                     Log.d("AddEntryVM", "Recalculating totals based on base values...")
+                     val newCalories = (currentState.baseCaloriesPerUnit * newQuantity).roundToInt()
+                     val newProtein = (currentState.baseProteinPerUnit * newQuantity).roundToInt()
+                     _uiState.update {
+                         it.copy(
+                             quantity = intent.quantity,
+                             calories = newCalories.toString(),
+                             protein = newProtein.toString()
+                         )
+                     }
+                 } else {
+                    Log.d("AddEntryVM", "Updating quantity only (base values null, unit mismatch, or invalid qty).")
+                    _uiState.update { it.copy(quantity = intent.quantity) }
+                 }
+            }
+            is AddFoodContract.Intent.UpdateUnit -> {
                 val currentState = uiState.value
-                Log.d("AddEntryVM", "Current State: suggestionSelected=${currentState.suggestionSelected}, baseCal=${currentState.baseCaloriesPerUnit}, basePro=${currentState.baseProteinPerUnit}")
-                val newQuantity = intent.quantity.toDoubleOrNull()
-                if (currentState.suggestionSelected && newQuantity != null && newQuantity > 0 && currentState.baseCaloriesPerUnit != null && currentState.baseProteinPerUnit != null) {
-                    Log.d("AddEntryVM", "Recalculating totals...")
-                    val newCalories = (currentState.baseCaloriesPerUnit * newQuantity).roundToInt()
-                    val newProtein = (currentState.baseProteinPerUnit * newQuantity).roundToInt()
-                    _uiState.update {
+                val newUnit = intent.unit
+                // Check if we have base values stored from a previous suggestion
+                if (currentState.baseUnit != null) {
+                    // If new unit matches the original base unit, keep base values; otherwise clear them
+                     _uiState.update {
                         it.copy(
-                            quantity = intent.quantity,
-                            calories = newCalories.toString(),
-                            protein = newProtein.toString()
+                            unit = newUnit,
+                            baseCaloriesPerUnit = if (newUnit == currentState.baseUnit) it.baseCaloriesPerUnit else null,
+                            baseProteinPerUnit = if (newUnit == currentState.baseUnit) it.baseProteinPerUnit else null
                         )
                     }
                 } else {
-                    Log.d("AddEntryVM", "NOT Recalculating. Updating quantity only.")
-                    _uiState.update { it.copy(quantity = intent.quantity, suggestionSelected = false) }
+                    // No base unit stored, just update the unit
+                    _uiState.update { it.copy(unit = newUnit) }
                 }
             }
-            is AddFoodContract.Intent.UpdateUnit -> _uiState.update { it.copy(unit = intent.unit, suggestionSelected = false) } // Clear flag
-            is AddFoodContract.Intent.UpdateCalories -> _uiState.update { it.copy(calories = intent.calories, suggestionSelected = false) } // Clear flag
-            is AddFoodContract.Intent.UpdateProtein -> _uiState.update { it.copy(protein = intent.protein, suggestionSelected = false) } // Clear flag
+            is AddFoodContract.Intent.UpdateCalories -> _uiState.update { it.copy(calories = intent.calories, baseCaloriesPerUnit = null, baseProteinPerUnit = null, baseUnit = null) }
+            is AddFoodContract.Intent.UpdateProtein -> _uiState.update { it.copy(protein = intent.protein, baseCaloriesPerUnit = null, baseProteinPerUnit = null, baseUnit = null) }
             is AddFoodContract.Intent.UpdateSelectedMeal -> _uiState.update { it.copy(selectedMeal = intent.meal) }
             is AddFoodContract.Intent.UpdateNotes -> _uiState.update { it.copy(notes = intent.notes) }
             AddFoodContract.Intent.SaveEntry -> saveEntry()
@@ -145,18 +161,18 @@ class AddEntryViewModel @Inject constructor(
     }
 
     private fun handleSuggestionSelection(foodItem: FoodItem) {
+        val suggestedUnit = foodItem.defaultUnit // Get the unit from the suggestion
         _uiState.update {
             it.copy(
                 foodName = foodItem.name,
                 quantity = "1",
-                unit = foodItem.defaultUnit ?: it.unit,
-                calories = foodItem.calories.roundToInt().toString(), // Use base value initially
-                protein = foodItem.protein.roundToInt().toString(), // Use base value initially
+                unit = suggestedUnit ?: it.unit, // Use suggested unit
+                calories = foodItem.calories.roundToInt().toString(),
+                protein = foodItem.protein.roundToInt().toString(),
                 suggestions = emptyList(),
-                // Store base values and set flag
                 baseCaloriesPerUnit = foodItem.calories,
                 baseProteinPerUnit = foodItem.protein,
-                suggestionSelected = true
+                baseUnit = suggestedUnit // Store the base unit
             )
         }
     }

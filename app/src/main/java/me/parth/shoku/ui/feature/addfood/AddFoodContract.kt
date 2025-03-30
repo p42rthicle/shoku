@@ -26,7 +26,7 @@ interface AddFoodContract {
      * @param suggestions List of food items for suggestions.
      * @param baseCaloriesPerUnit Calories of the suggested item per its default unit
      * @param baseProteinPerUnit Protein of the suggested item per its default unit
-     * @param suggestionSelected Flag to indicate if current values came from a suggestion
+     * @param baseUnit Store the unit corresponding to the base values
      * @param date Store the date being edited/added
      */
     data class UiState(
@@ -43,7 +43,7 @@ interface AddFoodContract {
         val suggestions: List<FoodItem> = emptyList(),
         val baseCaloriesPerUnit: Double? = null, // Calories of the suggested item per its default unit
         val baseProteinPerUnit: Double? = null, // Protein of the suggested item per its default unit
-        val suggestionSelected: Boolean = false, // Flag to indicate if current values came from a suggestion
+        val baseUnit: String? = null, // Store the unit corresponding to the base values
         val date: LocalDate = LocalDate.now() // Store the date being edited/added
     )
 
