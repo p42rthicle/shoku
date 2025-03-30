@@ -32,12 +32,12 @@ This document outlines the tasks required to implement the day-wise history scre
     -   [x] Make each row clickable, triggering `Intent.SelectDay`.
     -   [x] Handle loading and error states.
     -   [x] Add appropriate `TopAppBar` (e.g., title "History", back navigation).
--   [ ] **Dependency Injection (Hilt):**
-    -   [ ] Provide `HistoryViewModel`.
--   [ ] **Navigation:**
-    -   [ ] Add `History` destination to `Screen.kt`.
-    -   [ ] Add navigation from somewhere (e.g., `HomeScreen` TopAppBar menu, Bottom Navigation) to `HistoryScreen`.
-    -   [ ] Add navigation from `HistoryScreen` (on day selection) to the detailed day view (this might navigate back to `HomeScreen` with the selected date as an argument).
+-   [x] **Dependency Injection (Hilt):**
+    -   [x] Provide `HistoryViewModel`.
+-   [x] **Navigation:**
+    -   [x] Add `History` destination to `Screen.kt`.
+    -   [x] Add navigation from somewhere (e.g., `HomeScreen` TopAppBar menu, Bottom Navigation) to `HistoryScreen`.
+    -   [x] Add navigation from `HistoryScreen` (on day selection) to the detailed day view (this might navigate back to `HomeScreen` with the selected date as an argument).
 -   [ ] **Testing:**
     -   [ ] Unit Test: `HistoryViewModel` (data loading, state updates, navigation effect).
     -   [ ] Unit Test: `FoodRepository`/DAO (verify `getDailySummaries` logic/query).

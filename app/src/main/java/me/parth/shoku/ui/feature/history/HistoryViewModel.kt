@@ -7,13 +7,14 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import me.parth.shoku.domain.repository.FoodRepository
-import me.parth.shoku.ui.base.MviViewModel // Assuming base interface
+import me.parth.shoku.ui.feature.addfood.MviViewModel
 import javax.inject.Inject
 
 @HiltViewModel
 class HistoryViewModel @Inject constructor(
     private val foodRepository: FoodRepository
-) : ViewModel(), MviViewModel<HistoryContract.UiState, HistoryContract.Intent, HistoryContract.Effect> {
+) : ViewModel(),
+    MviViewModel<HistoryContract.UiState, HistoryContract.Intent, HistoryContract.Effect> {
 
     private val _uiState = MutableStateFlow(HistoryContract.UiState())
     override val uiState: StateFlow<HistoryContract.UiState> = _uiState.asStateFlow()

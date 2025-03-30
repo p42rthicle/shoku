@@ -25,6 +25,7 @@ import androidx.navigation.compose.*
 import dagger.hilt.android.AndroidEntryPoint
 import me.parth.shoku.ui.feature.addfood.AddFoodContract
 import me.parth.shoku.ui.feature.addfood.AddFoodScreen
+import me.parth.shoku.ui.feature.history.HistoryScreen
 import me.parth.shoku.ui.feature.home.HomeScreen
 import me.parth.shoku.ui.feature.home.HomeViewModel
 import me.parth.shoku.ui.feature.home.HomeContract
@@ -46,14 +47,19 @@ class MainActivity : ComponentActivity() {
 fun ShokuAppRoot() {
     ShokuTheme {
         val navController = rememberNavController()
+
         NavHost(
             navController = navController,
             startDestination = Screen.Home.route
         ) {
-            composable(Screen.Home.route) {
+            composable(
+                route = Screen.Home.route,
+                arguments = Screen.Home.arguments
+            ) {
                 HomeScreen(
                     onNavigateToAddEntry = { navController.navigate(Screen.AddFood.route) },
-                    onNavigateToSettings = { navController.navigate(Screen.DailyTargets.route) }
+                    onNavigateToSettings = { navController.navigate(Screen.DailyTargets.route) },
+                    onNavigateToHistory = { navController.navigate(Screen.History.route) }
                 )
             }
             composable(Screen.AddFood.route) {
@@ -66,6 +72,14 @@ fun ShokuAppRoot() {
                 DailyTargetScreen(
                     viewModel = homeViewModel,
                     onNavigateBack = { navController.popBackStack() }
+                )
+            }
+            composable(Screen.History.route) {
+                HistoryScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToDayDetail = { date ->
+                        navController.navigate(Screen.Home.createRoute(date.toString()))
+                    }
                 )
             }
         }
