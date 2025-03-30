@@ -6,11 +6,11 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import me.parth.shoku.domain.model.LoggedEntry
 import me.parth.shoku.domain.repository.FoodRepository
-import me.parth.shoku.ui.feature.addfood.MviViewModel // Reusing MviViewModel interface
+import me.parth.shoku.ui.feature.addfood.MviViewModel
 import java.time.LocalDate
 import javax.inject.Inject
+import kotlin.math.roundToInt // Import for rounding
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
@@ -26,21 +26,47 @@ class HomeViewModel @Inject constructor(
     init {
         // Load data for the initial date when the ViewModel is created
         loadDataForDate(uiState.value.selectedDate)
+        // Initialize input fields with current targets when VM starts
+        viewModelScope.launch {
+            _uiState.update {
+                it.copy(
+                    calorieTargetInput = foodRepository.getCalorieTarget().roundToInt().toString(),
+                    proteinTargetInput = foodRepository.getProteinTarget().roundToInt().toString()
+                )
+            }
+        }
     }
 
     override fun onIntent(intent: HomeContract.Intent) {
         when (intent) {
             is HomeContract.Intent.ChangeDate -> {
-                // Update state immediately and trigger data loading
                 _uiState.update { it.copy(selectedDate = intent.date, isLoading = true, error = null) }
                 loadDataForDate(intent.date)
             }
             is HomeContract.Intent.LoadDataForSelectedDate -> {
-                // Explicit reload for the current date
                 loadDataForDate(uiState.value.selectedDate)
             }
             is HomeContract.Intent.OpenTargetSettings -> {
-                sendEffect(HomeContract.Effect.NavigateToTargetSettings)
+                // Load current targets into input fields when opening settings
+                viewModelScope.launch {
+                     _uiState.update {
+                        it.copy(
+                            calorieTargetInput = it.calorieTarget.roundToInt().toString(),
+                            proteinTargetInput = it.proteinTarget.roundToInt().toString()
+                        )
+                    }
+                    sendEffect(HomeContract.Effect.NavigateToTargetSettings)
+                }
+            }
+            // Handle new intents
+            is HomeContract.Intent.UpdateCalorieTargetInput -> {
+                _uiState.update { it.copy(calorieTargetInput = intent.value) }
+            }
+            is HomeContract.Intent.UpdateProteinTargetInput -> {
+                _uiState.update { it.copy(proteinTargetInput = intent.value) }
+            }
+            is HomeContract.Intent.SaveTargets -> {
+                saveTargets()
             }
         }
     }
@@ -96,6 +122,37 @@ class HomeViewModel @Inject constructor(
                     )
                 }
                 sendEffect(HomeContract.Effect.ShowError("Failed to load data"))
+            }
+        }
+    }
+
+    private fun saveTargets() {
+        val currentState = uiState.value
+        val calorieTargetDouble = currentState.calorieTargetInput.toDoubleOrNull()
+        val proteinTargetDouble = currentState.proteinTargetInput.toDoubleOrNull()
+
+        if (calorieTargetDouble == null || calorieTargetDouble <= 0 || proteinTargetDouble == null || proteinTargetDouble <= 0) {
+            sendEffect(HomeContract.Effect.ShowError("Please enter valid positive numbers for targets."))
+            return
+        }
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isSavingTarget = true) }
+            try {
+                foodRepository.saveCalorieTarget(calorieTargetDouble)
+                foodRepository.saveProteinTarget(proteinTargetDouble)
+                // Update the main state targets as well after saving
+                _uiState.update {
+                     it.copy(
+                         calorieTarget = calorieTargetDouble,
+                         proteinTarget = proteinTargetDouble,
+                         isSavingTarget = false
+                     )
+                 }
+                sendEffect(HomeContract.Effect.TargetsSavedSuccessfully)
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isSavingTarget = false) }
+                sendEffect(HomeContract.Effect.ShowError("Failed to save targets: ${e.localizedMessage}"))
             }
         }
     }

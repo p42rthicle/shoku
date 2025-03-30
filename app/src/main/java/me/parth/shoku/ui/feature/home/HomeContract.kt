@@ -18,6 +18,9 @@ interface HomeContract {
      * @param totalProtein Sum of protein for the selected date.
      * @param calorieTarget User's daily calorie goal.
      * @param proteinTarget User's daily protein goal.
+     * @param calorieTargetInput Input value for calorie target.
+     * @param proteinTargetInput Input value for protein target.
+     * @param isSavingTarget Indicates if target is being saved.
      * @param isLoading Indicates if data is currently being loaded.
      * @param error A message describing an error, if one occurred.
      */
@@ -28,6 +31,9 @@ interface HomeContract {
         val totalProtein: Double = 0.0,
         val calorieTarget: Double = 2000.0, // Default target
         val proteinTarget: Double = 100.0, // Default target
+        val calorieTargetInput: String = "",
+        val proteinTargetInput: String = "",
+        val isSavingTarget: Boolean = false,
         val isLoading: Boolean = false,
         val error: String? = null
     )
@@ -40,6 +46,10 @@ interface HomeContract {
         data object LoadDataForSelectedDate : Intent // Explicit intent to load/reload
         data object OpenTargetSettings : Intent
         // Add other intents like DeleteEntry if needed later
+        // New Intents for target setting:
+        data class UpdateCalorieTargetInput(val value: String) : Intent
+        data class UpdateProteinTargetInput(val value: String) : Intent
+        data object SaveTargets : Intent
     }
 
     /**
@@ -49,5 +59,7 @@ interface HomeContract {
     sealed interface Effect {
         data object NavigateToTargetSettings : Effect
         data class ShowError(val message: String) : Effect
+        // New Effect for feedback on save:
+        data object TargetsSavedSuccessfully : Effect
     }
 } 

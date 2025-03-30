@@ -11,50 +11,42 @@ This document outlines the tasks required to implement the daily summary display
 
 ## Implementation To-Do List
 
--   [ ] **Repository (`FoodRepository`):**
-    -   [ ] Add method `getEntriesForDate(date: LocalDate): Flow<List<LoggedEntry>>` (if not already present and verified).
-    -   [ ] Add method/logic to calculate daily totals (sum calories, sum protein) from entries for a specific date. This could be done in the repository or potentially the ViewModel based on the raw entry list.
-    -   [ ] Add methods to save/retrieve daily targets (e.g., using `SharedPreferences` or a dedicated `DailyTarget` entity/DAO/table).
--   [ ] **ViewModel (`HomeViewModel`):**
-    -   [ ] Create `HomeViewModel` class.
-    -   [ ] Inject `FoodRepository`.
-    -   [ ] Define `UiState` for `HomeScreen` including:
-        -   `selectedDate: LocalDate`
-        -   `dailyEntries: List<LoggedEntry>`
-        -   `totalCalories: Double`
-        -   `totalProtein: Double`
-        -   `calorieTarget: Double`
-        -   `proteinTarget: Double`
-        -   `isLoading: Boolean`
-        -   `error: String?`
-    -   [ ] Implement logic to observe `selectedDate` changes.
-    -   [ ] On date change, fetch entries for that date from the repository.
-    -   [ ] Calculate daily totals based on fetched entries.
-    -   [ ] Fetch daily targets from the repository.
-    -   [ ] Update the `UiState` Flow.
-    -   [ ] Define `Intent`s for changing the selected date (`ChangeDate`), opening target settings (`OpenTargetSettings`), potentially retrying load (`RetryLoad`).
-    -   [ ] Define `Effect`s for navigation (`NavigateToTargetSettings`) or showing errors (`ShowError`).
--   [ ] **UI (`HomeScreen`):**
+-   [x] **Repository (`FoodRepository`):**
+    -   [x] Add method `getEntriesForDate(date: LocalDate): Flow<List<LoggedEntry>>` (if not already present and verified). ✅
+    -   [ ] Add method/logic to calculate daily totals (sum calories, sum protein) from entries for a specific date. *(Implemented in ViewModel)*
+    -   [x] Add methods to save/retrieve daily targets (e.g., using `SharedPreferences`). ✅
+-   [x] **ViewModel (`HomeViewModel`):**
+    -   [x] Create `HomeViewModel` class. ✅
+    -   [x] Inject `FoodRepository`. ✅
+    -   [x] Define `UiState` for `HomeScreen` including necessary fields (date, entries, totals, targets, inputs, loading states). ✅
+    -   [x] Implement logic to observe `selectedDate` changes. *(Handled by `ChangeDate` Intent)* ✅
+    -   [x] On date change, fetch entries for that date from the repository. ✅
+    -   [x] Calculate daily totals based on fetched entries. ✅
+    -   [x] Fetch daily targets from the repository. ✅
+    -   [x] Update the `UiState` Flow. ✅
+    -   [x] Define `Intent`s for changing date, loading, opening/saving targets. ✅
+    -   [x] Define `Effect`s for navigation and showing errors/success. ✅
+-   [x] **UI (`HomeScreen`):**
     -   [x] Create `HomeScreen` Composable function. ✅
     -   [x] Connect to `HomeViewModel` using `hiltViewModel()` and collect `uiState`. ✅
-    -   [x] Implement `DateSelector` Composable (e.g., scrollable row with dates, arrows to change day). ✅
-    -   [x] Implement `DailySummaryDisplay` Composable showing total calories/protein. ✅
-    -   [x] Implement `TargetProgressIndicator` Composable (e.g., progress bars or Pie chart) showing consumed vs. target. ✅
-    -   [x] Implement `DailyLogList` Composable displaying `dailyEntries` (potentially grouped by meal). ✅
+    -   [x] Implement `DateSelector` Composable. ✅
+    -   [x] Implement `DailySummaryDisplay` Composable. ✅
+    -   [x] Implement `TargetProgressIndicator` Composable. ✅
+    -   [x] Implement `DailyLogList` Composable (grouped by meal). ✅
     -   [x] Add button/icon to trigger `Intent.OpenTargetSettings`. ✅
-    -   [x] Add FAB to navigate to `AddFoodScreen` (Navigation setup required). ✅
--   [ ] **UI (`DailyTargetScreen` or Dialog):**
-    -   [ ] Create a simple screen or dialog Composable for setting calorie and protein targets.
-    -   [ ] Connect inputs to a relevant ViewModel (could be `HomeViewModel` or a dedicated `SettingsViewModel`) to save targets via the repository.
--   [ ] **Dependency Injection (Hilt):**
+    -   [x] Add FAB to navigate to `AddFoodScreen`. ✅
+-   [x] **UI (`DailyTargetScreen` or Dialog):**
+    -   [x] Create a simple screen Composable (`DailyTargetScreen`) for setting targets. ✅
+    -   [x] Connect inputs and save button to `HomeViewModel`. ✅
+-   [x] **Dependency Injection (Hilt):**
     -   [x] Provide `HomeViewModel`. ✅
-    -   [x] Ensure `FoodRepository` and target storage mechanism (e.g., `SharedPreferences` accessor or `DailyTargetDao`) are provided. ✅
--   [ ] **Navigation:**
+    -   [x] Ensure `FoodRepository` and target storage mechanism are provided. ✅
+-   [x] **Navigation:**
     -   [x] Update `MainActivity` / `NavHost` to include `HomeScreen` as the start destination. ✅
     -   [x] Add navigation action from `HomeScreen` FAB to `AddFoodScreen`. ✅
-    -   [x] Add navigation action from `HomeScreen` settings button to `DailyTargetScreen` (or handle dialog display). ✅
+    -   [x] Add navigation action from `HomeScreen` settings button to `DailyTargetScreen`. ✅
 -   [ ] **Testing:**
     -   [ ] Unit Test: `HomeViewModel` (date changes, data loading, calculations, target handling).
-    -   [ ] Unit Test: `FoodRepository` (daily total calculation logic, target saving/loading).
+    -   [ ] Unit Test: `FoodRepository` (target saving/loading - SharedPreferences testing can be tricky).
     -   [ ] Instrumentation Test: `HomeScreen` (date selection, summary display, target display, list display, navigation).
     -   [ ] Instrumentation Test: `DailyTargetScreen`/Dialog. 

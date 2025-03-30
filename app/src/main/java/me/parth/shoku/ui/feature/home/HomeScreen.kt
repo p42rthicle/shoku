@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -34,6 +35,7 @@ fun HomeScreen(
     onNavigateToSettings: () -> Unit  // Callback for Settings icon click
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     // Handle effects
     LaunchedEffect(Unit) {
@@ -41,13 +43,18 @@ fun HomeScreen(
             when (effect) {
                 is HomeContract.Effect.NavigateToTargetSettings -> onNavigateToSettings()
                 is HomeContract.Effect.ShowError -> {
-                    // TODO: Show Snackbar or other error UI
+                    snackbarHostState.showSnackbar(
+                        message = effect.message,
+                        duration = SnackbarDuration.Short
+                    )
                 }
+                else -> {}
             }
         }
     }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text("Shoku Diary") },
