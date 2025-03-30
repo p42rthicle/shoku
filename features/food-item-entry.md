@@ -30,3 +30,25 @@ This document outlines the tasks required to implement the basic food item entry
 -   [x] **UI Connection:** Connect `AddFoodScreen` input fields' state to the ViewModel's state management (or directly trigger intents). ✅
 -   [x] **UI Connection:** Trigger `Intent.SaveEntry` from the Save Button's `onClick` lambda, passing the current input data. ✅
 -   [x] **Navigation (Basic):** Set up basic navigation to be able to reach `AddFoodScreen` (even if temporary from MainActivity initially). ✅
+
+### Testing (To Be Done)
+
+-   [ ] **Unit Test: `AddEntryViewModel`**
+    -   [ ] Verify successful save (`SaveEntry` intent) inserts correct data via repository.
+    -   [ ] Verify save fails when required fields are blank/invalid (e.g., name, zero quantity).
+    -   [ ] Verify state updates correctly for each `UpdateX` intent (e.g., `UpdateQuantity`, `UpdateUnit`).
+    -   [ ] Verify `isLoading` state is true during save and false after.
+    -   [ ] Verify `EntrySavedSuccessfully` effect is sent on success.
+    -   [ ] Verify `ShowError` effect is sent on validation failure or repository error.
+-   [ ] **Unit Test: `FoodRepositoryImpl`**
+    -   [ ] Verify `addLoggedEntry` correctly inserts `LoggedEntryEntity`.
+    -   [ ] Verify `addLoggedEntry` creates a new `FoodItemEntity` if it doesn't exist.
+    -   [ ] Verify `addLoggedEntry` increments frequency of existing `FoodItemEntity`.
+    -   [ ] Verify `addLoggedEntry` handles potential race conditions or errors during insertion gracefully.
+-   [ ] **Instrumentation Test: `AddFoodScreen`**
+    -   [ ] Verify all input fields are present and editable.
+    -   [ ] Verify dropdowns (`Unit`, `Meal`) display options and update state on selection.
+    -   [ ] Verify typing in fields updates the underlying ViewModel state.
+    -   [ ] Verify clicking 'Save' triggers the correct ViewModel intent.
+    -   [ ] Verify error messages/states are shown correctly on validation failure (if UI handles this).
+    -   [ ] Verify successful save navigates away or clears the form (depending on desired behavior).

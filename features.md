@@ -90,6 +90,7 @@ We will implement the application following the Clean Architecture principles ou
 9.  **Connect UI & Logic:**
     *   Connect `AddFoodScreen` inputs and button to `AddEntryViewModel` functions.
     *   Ensure data flows from UI -> ViewModel -> Repository -> Database.
+    *   **Testing:** Write initial Unit Tests for `AddEntryViewModel` saving logic and Repository insert methods.
 
 **Phase 2: Daily View, Suggestions & Targets**
 
@@ -122,7 +123,8 @@ We will implement the application following the Clean Architecture principles ou
 6.  **Daily Targets:**
     *   Add functionality to store/retrieve daily targets (could be simple `SharedPreferences` initially or a dedicated table).
     *   Update `HomeViewModel` to load/save targets.
-    *   Create `DailyTargetSetting`
+    *   Create `DailyTargetSetting` UI (can be simple screen or dialog).
+    *   **Testing:** Add Unit Tests for ViewModel suggestion logic, daily summary calculation, and target handling. Add UI tests for `AddFoodScreen` suggestion interaction and `HomeScreen` display.
 
 5.  **Testing:**
     *   Write Unit Tests for ViewModels and Repository logic.
