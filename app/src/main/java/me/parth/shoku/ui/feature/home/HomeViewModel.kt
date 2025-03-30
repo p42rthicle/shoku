@@ -1,5 +1,6 @@
 package me.parth.shoku.ui.feature.home
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -8,16 +9,23 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import me.parth.shoku.domain.repository.FoodRepository
 import me.parth.shoku.ui.feature.addfood.MviViewModel
+import me.parth.shoku.ui.navigation.Screen
 import java.time.LocalDate
+import java.time.format.DateTimeParseException
 import javax.inject.Inject
 import kotlin.math.roundToInt // Import for rounding
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val foodRepository: FoodRepository
+    private val foodRepository: FoodRepository,
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel(), MviViewModel<HomeContract.UiState, HomeContract.Intent, HomeContract.Effect> {
 
-    private val _uiState = MutableStateFlow(HomeContract.UiState())
+    private val initialDate: LocalDate = savedStateHandle.get<String>(Screen.Home.dateArg)?.let {
+        try { LocalDate.parse(it) } catch (e: DateTimeParseException) { null }
+    } ?: LocalDate.now()
+
+    private val _uiState = MutableStateFlow(HomeContract.UiState(selectedDate = initialDate))
     override val uiState: StateFlow<HomeContract.UiState> = _uiState.asStateFlow()
 
     private val _effect = Channel<HomeContract.Effect>(Channel.BUFFERED)
@@ -25,7 +33,7 @@ class HomeViewModel @Inject constructor(
 
     init {
         // Load data for the initial date when the ViewModel is created
-        loadDataForDate(uiState.value.selectedDate)
+        loadDataForDate(initialDate)
         // Initialize input fields with current targets when VM starts
         viewModelScope.launch {
             _uiState.update {

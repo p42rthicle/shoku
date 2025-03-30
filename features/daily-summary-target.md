@@ -33,6 +33,8 @@ This document outlines the tasks required to implement the daily summary display
     -   [x] Implement `DailySummaryDisplay` Composable. ✅
     -   [x] Implement `TargetProgressIndicator` Composable. ✅
     -   [x] Implement `DailyLogList` Composable (grouped by meal). ✅
+        -   [ ] *(Future Enhancement)* Add click action to edit a logged item.
+        -   [ ] *(Future Enhancement)* Add swipe action or button to delete a logged item.
     -   [x] Add button/icon to trigger `Intent.OpenTargetSettings`. ✅
     -   [x] Add FAB to navigate to `AddFoodScreen`. ✅
 -   [x] **UI (`DailyTargetScreen` or Dialog):**

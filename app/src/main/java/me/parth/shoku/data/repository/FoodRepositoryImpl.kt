@@ -12,6 +12,8 @@ import me.parth.shoku.data.local.dao.FoodItemDao
 import me.parth.shoku.data.local.dao.LoggedEntryDao
 import me.parth.shoku.data.local.entity.FoodItemEntity
 import me.parth.shoku.data.local.entity.LoggedEntryEntity
+import me.parth.shoku.data.local.pojo.DailySummaryPojo
+import me.parth.shoku.domain.model.DailySummary
 import me.parth.shoku.domain.model.FoodItem
 import me.parth.shoku.domain.model.LoggedEntry
 import me.parth.shoku.domain.repository.FoodRepository
@@ -127,6 +129,23 @@ class FoodRepositoryImpl @Inject constructor(
         return withContext(Dispatchers.IO) {
             sharedPreferences.getFloat(KEY_PROTEIN_TARGET, DEFAULT_PROTEIN_TARGET.toFloat()).toDouble()
         }
+    }
+
+    // --- History Implementation ---
+
+    override fun getDailySummaries(): Flow<List<DailySummary>> {
+        return loggedEntryDao.getDailySummaries()
+            .map { pojoList ->
+                pojoList.map { pojo ->
+                    // Map from Pojo (with String date) to Domain model (with LocalDate)
+                    DailySummary(
+                        date = LocalDate.parse(pojo.date), // Parse the date string
+                        totalCalories = pojo.totalCalories,
+                        totalProtein = pojo.totalProtein
+                    )
+                }
+            }
+            .flowOn(Dispatchers.IO)
     }
 }
 

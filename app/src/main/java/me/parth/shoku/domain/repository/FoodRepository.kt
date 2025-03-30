@@ -1,6 +1,7 @@
 package me.parth.shoku.domain.repository
 
 import kotlinx.coroutines.flow.Flow
+import me.parth.shoku.domain.model.DailySummary
 import me.parth.shoku.domain.model.FoodItem
 import me.parth.shoku.domain.model.LoggedEntry
 import java.time.LocalDate
@@ -33,6 +34,9 @@ interface FoodRepository {
     suspend fun getCalorieTarget(): Double // Returns default if not set
     suspend fun saveProteinTarget(target: Double)
     suspend fun getProteinTarget(): Double // Returns default if not set
+
+    // --- History --- 
+    fun getDailySummaries(): Flow<List<DailySummary>>
 
     // Add other methods as needed (e.g., get daily summary, get history)
 } 

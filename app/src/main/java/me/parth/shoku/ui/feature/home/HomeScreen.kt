@@ -9,6 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -31,8 +32,9 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
-    onNavigateToAddEntry: () -> Unit, // Callback for FAB click
-    onNavigateToSettings: () -> Unit  // Callback for Settings icon click
+    onNavigateToAddEntry: () -> Unit,
+    onNavigateToSettings: () -> Unit,
+    onNavigateToHistory: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -59,6 +61,9 @@ fun HomeScreen(
             TopAppBar(
                 title = { Text("Shoku Diary") },
                 actions = {
+                    IconButton(onClick = onNavigateToHistory) {
+                        Icon(Icons.Filled.Refresh, contentDescription = "History")
+                    }
                     IconButton(onClick = { viewModel.onIntent(HomeContract.Intent.OpenTargetSettings) }) {
                         Icon(Icons.Default.Settings, contentDescription = "Settings")
                     }
