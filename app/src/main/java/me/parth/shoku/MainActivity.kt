@@ -5,6 +5,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -14,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.*
 import dagger.hilt.android.AndroidEntryPoint
 import me.parth.shoku.ui.feature.addfood.AddFoodScreen
+import me.parth.shoku.ui.feature.home.HomeScreen
 import me.parth.shoku.ui.navigation.Screen
 import me.parth.shoku.ui.theme.ShokuTheme
 
@@ -37,9 +40,9 @@ fun ShokuAppRoot() {
             startDestination = Screen.Home.route
         ) {
             composable(Screen.Home.route) {
-                PlaceholderHomeScreen(
-                    modifier = Modifier.fillMaxSize(),
-                    onNavigateToAddFood = { navController.navigate(Screen.AddFood.route) }
+                HomeScreen(
+                    onNavigateToAddEntry = { navController.navigate(Screen.AddFood.route) },
+                    onNavigateToSettings = { navController.navigate(Screen.DailyTargets.route) }
                 )
             }
             composable(Screen.AddFood.route) {
@@ -47,13 +50,31 @@ fun ShokuAppRoot() {
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
+            composable(Screen.DailyTargets.route) {
+                PlaceholderDailyTargetScreen(
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PlaceholderHomeScreen(modifier: Modifier = Modifier, onNavigateToAddFood: () -> Unit) {
-    Scaffold(modifier = modifier) { paddingValues ->
+fun PlaceholderDailyTargetScreen(modifier: Modifier = Modifier, onNavigateBack: () -> Unit) {
+    Scaffold(
+        modifier = modifier,
+        topBar = {
+            TopAppBar(
+                title = { Text("Set Daily Targets") },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                }
+            )
+        }
+    ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -62,11 +83,7 @@ fun PlaceholderHomeScreen(modifier: Modifier = Modifier, onNavigateToAddFood: ()
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text("Home Screen Placeholder")
-            Spacer(modifier = Modifier.height(20.dp))
-            Button(onClick = onNavigateToAddFood) {
-                Text("Go to Add Food")
-            }
+            Text("Daily Target Settings Placeholder")
         }
     }
 }
@@ -75,6 +92,6 @@ fun PlaceholderHomeScreen(modifier: Modifier = Modifier, onNavigateToAddFood: ()
 @Composable
 fun DefaultPreview() {
     ShokuTheme {
-        PlaceholderHomeScreen(onNavigateToAddFood = {})
+        PlaceholderDailyTargetScreen(onNavigateBack = {})
     }
 }

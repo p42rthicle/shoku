@@ -1,5 +1,8 @@
 package me.parth.shoku.data.repository
 
+import android.content.Context
+import android.content.SharedPreferences
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
@@ -23,8 +26,21 @@ import javax.inject.Singleton
 @Singleton
 class FoodRepositoryImpl @Inject constructor(
     private val foodItemDao: FoodItemDao,
-    private val loggedEntryDao: LoggedEntryDao
+    private val loggedEntryDao: LoggedEntryDao,
+    @ApplicationContext private val context: Context // Inject ApplicationContext
 ) : FoodRepository {
+
+    // Constants for SharedPreferences
+    private val PREFS_NAME = "shoku_prefs"
+    private val KEY_CALORIE_TARGET = "calorie_target"
+    private val KEY_PROTEIN_TARGET = "protein_target"
+    private val DEFAULT_CALORIE_TARGET = 2000.0
+    private val DEFAULT_PROTEIN_TARGET = 100.0
+
+    // Lazy initialize SharedPreferences
+    private val sharedPreferences: SharedPreferences by lazy {
+        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    }
 
     override suspend fun addLoggedEntry(entry: LoggedEntry) {
         // Ensure database operations run on an appropriate background thread
@@ -85,6 +101,32 @@ class FoodRepositoryImpl @Inject constructor(
                 entityList.map { it.toDomainModel() } // Map each entity to domain model
             }
             .flowOn(Dispatchers.IO) // Ensure flow collection happens off the main thread
+    }
+
+    // --- Daily Target Implementation ---
+
+    override suspend fun saveCalorieTarget(target: Double) {
+        withContext(Dispatchers.IO) { // Use IO dispatcher for SharedPreferences write
+            sharedPreferences.edit().putFloat(KEY_CALORIE_TARGET, target.toFloat()).apply()
+        }
+    }
+
+    override suspend fun getCalorieTarget(): Double {
+        return withContext(Dispatchers.IO) { // Use IO dispatcher for SharedPreferences read
+            sharedPreferences.getFloat(KEY_CALORIE_TARGET, DEFAULT_CALORIE_TARGET.toFloat()).toDouble()
+        }
+    }
+
+    override suspend fun saveProteinTarget(target: Double) {
+        withContext(Dispatchers.IO) {
+            sharedPreferences.edit().putFloat(KEY_PROTEIN_TARGET, target.toFloat()).apply()
+        }
+    }
+
+    override suspend fun getProteinTarget(): Double {
+        return withContext(Dispatchers.IO) {
+            sharedPreferences.getFloat(KEY_PROTEIN_TARGET, DEFAULT_PROTEIN_TARGET.toFloat()).toDouble()
+        }
     }
 }
 

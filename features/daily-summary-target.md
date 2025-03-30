@@ -35,24 +35,24 @@ This document outlines the tasks required to implement the daily summary display
     -   [ ] Define `Intent`s for changing the selected date (`ChangeDate`), opening target settings (`OpenTargetSettings`), potentially retrying load (`RetryLoad`).
     -   [ ] Define `Effect`s for navigation (`NavigateToTargetSettings`) or showing errors (`ShowError`).
 -   [ ] **UI (`HomeScreen`):**
-    -   [ ] Create `HomeScreen` Composable function.
-    -   [ ] Connect to `HomeViewModel` using `hiltViewModel()` and collect `uiState`.
-    -   [ ] Implement `DateSelector` Composable (e.g., scrollable row with dates, arrows to change day).
-    -   [ ] Implement `DailySummaryDisplay` Composable showing total calories/protein.
-    -   [ ] Implement `TargetProgressIndicator` Composable (e.g., progress bars or Pie chart) showing consumed vs. target.
-    -   [ ] Implement `DailyLogList` Composable displaying `dailyEntries` (potentially grouped by meal).
-    -   [ ] Add button/icon to trigger `Intent.OpenTargetSettings`.
-    -   [ ] Add FAB to navigate to `AddFoodScreen` (Navigation setup required).
+    -   [x] Create `HomeScreen` Composable function. ✅
+    -   [x] Connect to `HomeViewModel` using `hiltViewModel()` and collect `uiState`. ✅
+    -   [x] Implement `DateSelector` Composable (e.g., scrollable row with dates, arrows to change day). ✅
+    -   [x] Implement `DailySummaryDisplay` Composable showing total calories/protein. ✅
+    -   [x] Implement `TargetProgressIndicator` Composable (e.g., progress bars or Pie chart) showing consumed vs. target. ✅
+    -   [x] Implement `DailyLogList` Composable displaying `dailyEntries` (potentially grouped by meal). ✅
+    -   [x] Add button/icon to trigger `Intent.OpenTargetSettings`. ✅
+    -   [x] Add FAB to navigate to `AddFoodScreen` (Navigation setup required). ✅
 -   [ ] **UI (`DailyTargetScreen` or Dialog):**
     -   [ ] Create a simple screen or dialog Composable for setting calorie and protein targets.
     -   [ ] Connect inputs to a relevant ViewModel (could be `HomeViewModel` or a dedicated `SettingsViewModel`) to save targets via the repository.
 -   [ ] **Dependency Injection (Hilt):**
-    -   [ ] Provide `HomeViewModel`.
-    -   [ ] Ensure `FoodRepository` and target storage mechanism (e.g., `SharedPreferences` accessor or `DailyTargetDao`) are provided.
+    -   [x] Provide `HomeViewModel`. ✅
+    -   [x] Ensure `FoodRepository` and target storage mechanism (e.g., `SharedPreferences` accessor or `DailyTargetDao`) are provided. ✅
 -   [ ] **Navigation:**
-    -   [ ] Update `MainActivity` / `NavHost` to include `HomeScreen` as the start destination.
-    -   [ ] Add navigation action from `HomeScreen` FAB to `AddFoodScreen`.
-    -   [ ] Add navigation action from `HomeScreen` settings button to `DailyTargetScreen` (or handle dialog display).
+    -   [x] Update `MainActivity` / `NavHost` to include `HomeScreen` as the start destination. ✅
+    -   [x] Add navigation action from `HomeScreen` FAB to `AddFoodScreen`. ✅
+    -   [x] Add navigation action from `HomeScreen` settings button to `DailyTargetScreen` (or handle dialog display). ✅
 -   [ ] **Testing:**
     -   [ ] Unit Test: `HomeViewModel` (date changes, data loading, calculations, target handling).
     -   [ ] Unit Test: `FoodRepository` (daily total calculation logic, target saving/loading).

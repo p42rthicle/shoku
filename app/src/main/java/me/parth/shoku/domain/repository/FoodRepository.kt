@@ -28,5 +28,11 @@ interface FoodRepository {
      */
     fun getFoodSuggestions(query: String): Flow<List<FoodItem>>
 
+    // --- Daily Targets ---
+    suspend fun saveCalorieTarget(target: Double)
+    suspend fun getCalorieTarget(): Double // Returns default if not set
+    suspend fun saveProteinTarget(target: Double)
+    suspend fun getProteinTarget(): Double // Returns default if not set
+
     // Add other methods as needed (e.g., get daily summary, get history)
 } 
