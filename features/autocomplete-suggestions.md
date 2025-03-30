@@ -19,4 +19,4 @@ This document outlines the tasks required to implement the food name autocomplet
     -   [x] Modify the `Food Name` `OutlinedTextField` area to display the list of suggestions (`uiState.suggestions`) below it when the list is not empty (e.g., using a `Column` or `LazyColumn` below the TextField).
     -   [x] Make each suggestion item clickable.
     -   [x] When a suggestion item is clicked, trigger the `Intent.SelectSuggestion(foodItem: FoodItem)`.
--   [ ] **Testing:** Add tests for suggestion logic in ViewModel and Repository (optional but recommended).
+-   [x] **Testing:** Add tests for suggestion logic in ViewModel and Repository (optional but recommended).
